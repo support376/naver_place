@@ -1,4 +1,9 @@
-__pycache__/
-*.pyc
+.claude/
 .vercel/
-.env
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+_codex_backup/
+_codex_current/

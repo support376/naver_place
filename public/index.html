@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>브랜딩오토 - AI 브랜딩 자동화 플랫폼</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg: #09090b;
+  --sidebar-bg: #0f1117;
+  --card: #111827;
+  --card2: #1a1f2e;
+  --border: #1f2937;
+  --text: #e4e6ed;
+  --text2: #8b8fa3;
+  --accent: #6366f1;
+  --accent2: #818cf8;
+  --green: #10b981;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+  --sidebar-w: 240px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans KR', -apple-system, sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w);
+  background:var(--sidebar-bg); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; z-index:100;
+  padding:20px 0;
+}
+.sidebar-logo {
+  font-size:20px; font-weight:900; padding:0 24px; margin-bottom:32px;
+  cursor:pointer;
+  background:linear-gradient(135deg, var(--accent), #a78bfa);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.sidebar-section {
+  font-size:10px; font-weight:700; color:#4b5563;
+  text-transform:uppercase; letter-spacing:1.2px;
+  padding:0 24px; margin:20px 0 8px;
+}
+.sidebar-item {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 24px; cursor:pointer; transition:.15s;
+  color:var(--text2); font-size:13px; font-weight:500;
+  border-left:3px solid transparent; text-decoration:none;
+}
+.sidebar-item:hover { background:rgba(99,102,241,.06); color:var(--text); }
+.sidebar-item.on {
+  color:var(--accent2); background:rgba(99,102,241,.08);
+  border-left-color:var(--accent);
+}
+.sidebar-icon {
+  width:20px; height:20px; display:flex; align-items:center;
+  justify-content:center; font-size:15px; flex-shrink:0;
+}
+.sidebar-badge {
+  margin-left:auto; font-size:10px; padding:2px 7px;
+  border-radius:10px; background:var(--accent); color:#fff; font-weight:700;
+}
+.sidebar-bottom {
+  margin-top:auto; padding:16px 24px;
+  border-top:1px solid var(--border);
+}
+.sidebar-bottom p { font-size:10px; color:#4b5563; line-height:1.5; }
+
+/* ═══ MAIN ═══ */
+.main {
+  margin-left:var(--sidebar-w); flex:1; min-height:100vh;
+}
+.topbar {
+  position:sticky; top:0; z-index:50;
+  background:rgba(9,9,11,.85); backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  height:52px; display:flex; align-items:center; padding:0 28px;
+}
+.topbar-title { font-size:15px; font-weight:700; }
+.topbar-sub { font-size:12px; color:var(--text2); margin-left:12px; }
+
+.page { display:none; animation:fi .3s; }
+.page.on { display:block; }
+@keyframes fi { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ═══ DASHBOARD HOME ═══ */
+.dash-home { padding:32px 28px; }
+.dash-welcome { margin-bottom:32px; }
+.dash-welcome h1 { font-size:24px; font-weight:800; margin-bottom:4px; }
+.dash-welcome p { font-size:14px; color:var(--text2); }
+
+.dash-stats {
+  display:grid; grid-template-columns:repeat(3, 1fr);
+  gap:16px; margin-bottom:32px;
+}
+.stat-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:24px;
+}
+.stat-card .label { font-size:12px; color:var(--text2); font-weight:600; margin-bottom:8px; }
+.stat-card .value { font-size:28px; font-weight:800; }
+.stat-card .sub { font-size:11px; color:var(--text2); margin-top:4px; }
+
+.dash-tools {
+  display:grid; grid-template-columns:1fr 1fr; gap:16px;
+}
+.tool-card {
+  background:var(--card); border:1px solid var(--border); border-radius:16px;
+  padding:28px; cursor:pointer; transition:.2s; position:relative; overflow:hidden;
+}
+.tool-card:hover {
+  border-color:var(--accent); transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(99,102,241,.1);
+}
+.tool-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg, var(--accent), #a78bfa); opacity:0; transition:.2s;
+}
+.tool-card:hover::before { opacity:1; }
+.tool-icon { font-size:32px; margin-bottom:14px; }
+.tool-card h3 { font-size:16px; font-weight:800; margin-bottom:6px; }
+.tool-card p { font-size:12px; color:var(--text2); line-height:1.6; margin-bottom:14px; }
+.tool-tag {
+  display:inline-block; padding:3px 10px; border-radius:6px;
+  font-size:10px; font-weight:700; background:#1e1b4b; color:var(--accent2);
+}
+
+/* ═══ THREADS ═══ */
+.threads-page { padding:32px 28px; max-width:560px; }
+.threads-page h2 { font-size:20px; font-weight:800; margin-bottom:4px; }
+.threads-page .desc { font-size:13px; color:var(--text2); margin-bottom:24px; }
+.form-group { margin-bottom:16px; }
+.form-group label {
+  display:block; font-size:11px; font-weight:700;
+  color:var(--text2); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px;
+}
+.form-input {
+  width:100%; padding:12px 16px; border-radius:10px;
+  border:1px solid var(--border); background:var(--bg);
+  color:var(--text); font-size:14px; outline:none; font-family:inherit;
+  transition:border-color .2s;
+}
+.form-input:focus { border-color:var(--accent); }
+.form-select {
+  width:100%; padding:12px 16px; border-radius:10px;
+  border:1px solid var(--border); background:var(--bg);
+  color:var(--text); font-size:14px; outline:none; font-family:inherit;
+  appearance:none; cursor:pointer; transition:border-color .2s;
+}
+.form-select:focus { border-color:var(--accent); }
+.btn-primary {
+  padding:12px 24px; border-radius:10px; font-size:14px; font-weight:700;
+  border:none; cursor:pointer; font-family:inherit; transition:.2s;
+  background:var(--accent); color:#fff; width:100%;
+}
+.btn-primary:hover { background:#4f46e5; }
+.btn-primary:disabled { background:#374151; color:#6b7280; cursor:not-allowed; }
+.note { font-size:10px; color:#4b5563; text-align:center; margin-top:8px; }
+
+.ld { display:none; flex-direction:column; align-items:center; gap:10px; padding:40px; }
+.ld.on { display:flex; }
+.spinner {
+  width:36px; height:36px; border:3px solid var(--border);
+  border-top-color:var(--accent); border-radius:50%;
+  animation:sn .7s linear infinite;
+}
+@keyframes sn { to{transform:rotate(360deg)} }
+.er-box {
+  background:#7f1d1d; border:1px solid #991b1b; border-radius:10px;
+  padding:16px; margin-top:16px; text-align:center;
+}
+.er-box p { font-size:13px; color:#fca5a5; }
+
+/* ═══ THREADS REPORT ═══ */
+.report-page { padding:28px; max-width:800px; }
+.rh {
+  background:linear-gradient(135deg, #1e1b4b, var(--card));
+  border:1px solid var(--border); border-radius:16px;
+  padding:24px; display:flex; align-items:center;
+  gap:16px; margin-bottom:16px; flex-wrap:wrap;
+}
+.av {
+  width:52px; height:52px; border-radius:50%; background:#374151;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; font-weight:700; color:var(--accent2); flex-shrink:0;
+}
+.ri h2 { font-size:17px; font-weight:700; }
+.ri .mt { font-size:11px; color:var(--text2); margin-top:2px; }
+.sr {
+  width:80px; height:80px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin-left:auto; flex-shrink:0;
+}
+.si {
+  width:64px; height:64px; border-radius:50%; background:var(--card);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.si .gr { font-size:20px; font-weight:900; color:var(--accent2); }
+.si .pt { font-size:9px; color:var(--text2); }
+.ms { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px; }
+@media(max-width:900px) { .ms { grid-template-columns:repeat(2,1fr); } }
+.mc {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:10px; padding:14px; text-align:center;
+}
+.mc .v { font-size:18px; font-weight:700; }
+.mc .l { font-size:10px; color:#6b7280; margin-top:2px; }
+.sc {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:20px; margin-bottom:12px;
+}
+.sc h3 { font-size:14px; font-weight:600; margin-bottom:12px; }
+.sa { border-color:var(--accent); background:linear-gradient(135deg, #1e1b4b, var(--card)); }
+.cb { margin-bottom:8px; }
+.cb .cr { display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px; }
+.cb .n { color:#d1d5db; } .cb .vl { color:var(--accent2); font-weight:600; }
+.bbg { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+.bf { height:100%; border-radius:3px; background:linear-gradient(90deg, var(--accent), var(--accent2)); transition:width .5s; }
+.pc {
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:9px; padding:12px; margin-bottom:5px;
+  display:flex; gap:8px; align-items:flex-start;
+}
+.rk { min-width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
+.rg { background:#064e3b; color:#6ee7b7; } .rb { background:#7f1d1d; color:#fca5a5; }
+.pc .t { font-size:12px; color:#d1d5db; flex:1; }
+.pc .e { font-size:11px; color:#6b7280; white-space:nowrap; margin-left:6px; }
+.ci { background:rgba(0,0,0,.3); border-radius:9px; padding:12px; margin-bottom:6px; }
+.ci h4 { font-size:13px; font-weight:600; margin-bottom:3px; }
+.ci p { font-size:12px; color:var(--text2); }
+.tg { display:inline-block; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:600; margin-bottom:4px; }
+.tk { background:#064e3b; color:#6ee7b7; } .ti { background:#7c2d12; color:#fdba74; }
+.sg {
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:9px; padding:12px; margin-bottom:6px;
+  display:flex; gap:10px; align-items:flex-start;
+}
+.st { padding:3px 8px; border-radius:5px; font-size:10px; font-weight:600; white-space:nowrap; background:#1e1b4b; color:#a5b4fc; }
+.st.sh { background:#7c2d12; color:#fdba74; } .st.bl { background:#064e3b; color:#6ee7b7; }
+.sg .tx { font-size:12px; color:#d1d5db; flex:1; }
+.cp-btn { padding:4px 9px; border-radius:5px; font-size:10px; background:var(--accent); color:#fff; border:none; cursor:pointer; white-space:nowrap; }
+.cp-btn:hover { background:#4f46e5; } .cp-btn.ok { background:var(--green); }
+.cta-box {
+  background:var(--card); border:2px solid var(--accent);
+  border-radius:14px; padding:24px; text-align:center; margin-top:16px;
+}
+.cta-box h3 { font-size:16px; font-weight:700; margin-bottom:4px; }
+.cta-box p { font-size:12px; color:var(--text2); margin-bottom:12px; }
+
+/* ═══ PLACE ═══ */
+.place-page { padding:28px; max-width:960px; }
+.place-page h2 { font-size:20px; font-weight:800; margin-bottom:4px; }
+.place-page .desc { font-size:13px; color:var(--text2); margin-bottom:20px; }
+.place-tabs-row { display:flex; gap:4px; margin-bottom:20px; }
+.place-tab {
+  padding:8px 20px; border-radius:8px; cursor:pointer;
+  font-size:13px; font-weight:600; border:none;
+  background:transparent; color:var(--text2); transition:.2s; font-family:inherit;
+}
+.place-tab.active { background:var(--accent); color:#fff; }
+.place-tab:hover:not(.active) { background:var(--card2); color:var(--text); }
+
+.input-area {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:24px; margin-bottom:20px;
+}
+.input-row { display:flex; gap:10px; margin-bottom:12px; }
+.input-row input {
+  flex:1; padding:12px 16px; border-radius:10px;
+  border:1px solid var(--border); background:var(--card2);
+  color:var(--text); font-size:14px; outline:none; font-family:inherit;
+  transition:border-color .2s;
+}
+.input-row input:focus { border-color:var(--accent); }
+.input-row input::placeholder { color:var(--text2); }
+.btn-place {
+  padding:12px 28px; border-radius:10px; border:none;
+  background:var(--accent); color:#fff; font-size:14px; font-weight:700;
+  cursor:pointer; transition:.2s; white-space:nowrap; font-family:inherit;
+}
+.btn-place:hover { background:var(--accent2); }
+.btn-place:disabled { opacity:.5; cursor:not-allowed; }
+.btn-outline {
+  background:transparent; border:1px solid var(--border);
+  color:var(--text2); font-weight:600; padding:10px 20px;
+  font-size:13px; border-radius:10px; cursor:pointer; font-family:inherit;
+}
+.btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+.compare-urls { display:flex; flex-direction:column; gap:10px; }
+.compare-url-row { display:flex; gap:10px; align-items:center; }
+.compare-url-row input { flex:1; }
+.remove-url {
+  width:36px; height:36px; border-radius:8px; border:none;
+  background:var(--card2); color:var(--red); cursor:pointer;
+  font-size:18px; display:flex; align-items:center; justify-content:center;
+}
+.remove-url:hover { background:rgba(239,68,68,.15); }
+.compare-actions { display:flex; gap:10px; margin-top:8px; }
+
+.loading-place { text-align:center; padding:48px; color:var(--text2); }
+.error-box {
+  background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3);
+  border-radius:12px; padding:16px; text-align:center; color:var(--red); margin-bottom:20px;
+}
+.result { animation:fadeUp .4s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+.place-header-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:24px; margin-bottom:16px;
+  display:flex; gap:20px; align-items:center;
+}
+.place-photo { width:72px; height:72px; border-radius:12px; background:var(--card2); object-fit:cover; flex-shrink:0; }
+.place-info h2 { font-size:20px; font-weight:800; margin-bottom:4px; }
+.place-info .meta { color:var(--text2); font-size:12px; }
+.place-info .meta span { margin-right:12px; }
+.grade-section { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.grade-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:28px; text-align:center; }
+.grade-circle {
+  width:130px; height:130px; border-radius:50%;
+  margin:0 auto 14px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; border:4px solid;
+}
+.grade-letter { font-size:48px; font-weight:900; line-height:1; }
+.grade-pct { font-size:15px; font-weight:600; margin-top:2px; }
+.grade-text { font-size:13px; color:var(--text2); margin-top:8px; }
+.grade-score-text { font-size:12px; color:var(--text2); margin-top:4px; }
+.scores-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px; }
+.score-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; }
+.score-card .label { font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:600; }
+.score-card .value { font-size:26px; font-weight:800; margin-bottom:6px; }
+.score-bar { height:5px; background:var(--card2); border-radius:3px; overflow:hidden; }
+.score-bar-fill { height:100%; border-radius:3px; transition:width .6s ease; }
+.score-details { margin-top:10px; display:flex; flex-direction:column; gap:4px; }
+.score-detail { display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text2); }
+.score-detail .check { color:var(--green); } .score-detail .cross { color:var(--red); }
+.recs-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:16px; }
+.recs-card h3 { font-size:16px; font-weight:700; margin-bottom:14px; }
+.rec-item { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--border); }
+.rec-item:last-child { border-bottom:none; }
+.rec-badge { padding:3px 10px; border-radius:6px; font-size:10px; font-weight:700; flex-shrink:0; margin-top:2px; }
+.rec-badge.high { background:rgba(239,68,68,.15); color:var(--red); }
+.rec-badge.mid { background:rgba(245,158,11,.15); color:var(--yellow); }
+.rec-badge.low { background:rgba(16,185,129,.15); color:var(--green); }
+.rec-text { font-size:13px; line-height:1.6; }
+
+.compare-result { animation:fadeUp .4s ease; }
+.compare-table-wrap { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:16px; overflow-x:auto; }
+.compare-table-wrap h3 { font-size:16px; font-weight:700; margin-bottom:14px; }
+.compare-table { width:100%; border-collapse:collapse; font-size:13px; }
+.compare-table th, .compare-table td { padding:10px 14px; text-align:center; border-bottom:1px solid var(--border); }
+.compare-table th { color:var(--text2); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+.compare-table th:first-child, .compare-table td:first-child { text-align:left; }
+.compare-table .winner { color:var(--green); font-weight:700; }
+.compare-table .loser { color:var(--text2); }
+.compare-grade { display:inline-block; padding:4px 12px; border-radius:6px; font-weight:800; font-size:15px; }
+.chart-wrap { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:16px; max-width:520px; margin-left:auto; margin-right:auto; }
+.chart-wrap h3 { font-size:16px; font-weight:700; margin-bottom:14px; text-align:center; }
+
+.hidden { display:none; }
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:768px) {
+  .sidebar { width:60px; overflow:hidden; }
+  .sidebar:hover { width:var(--sidebar-w); }
+  .sidebar-item span { display:none; }
+  .sidebar:hover .sidebar-item span { display:inline; }
+  .sidebar-section { display:none; }
+  .sidebar:hover .sidebar-section { display:block; }
+  .sidebar-logo { font-size:16px; padding:0 16px; }
+  .sidebar:hover .sidebar-logo { padding:0 24px; }
+  .sidebar-badge { display:none; }
+  .sidebar:hover .sidebar-badge { display:inline; }
+  .sidebar-bottom { display:none; }
+  .main { margin-left:60px; }
+  .grade-section { grid-template-columns:1fr; }
+  .scores-grid { grid-template-columns:1fr 1fr; }
+  .dash-stats { grid-template-columns:1fr; }
+  .dash-tools { grid-template-columns:1fr; }
+}
+@media(max-width:480px) {
+  .scores-grid { grid-template-columns:1fr; }
+  .input-row { flex-direction:column; }
+  .ms { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo" onclick="go('home')">브랜딩오토</div>
+
+  <div class="sidebar-section">Overview</div>
+  <div class="sidebar-item on" data-page="home" onclick="go('home')">
+    <div class="sidebar-icon">📊</div><span>대시보드</span>
+  </div>
+
+  <div class="sidebar-section">Tools</div>
+  <div class="sidebar-item" data-page="threads" onclick="go('threads')">
+    <div class="sidebar-icon">@</div><span>Threads 분석</span>
+    <span class="sidebar-badge">AI</span>
+  </div>
+  <div class="sidebar-item" data-page="threads-report" onclick="go('threads-report')">
+    <div class="sidebar-icon">📋</div><span>Threads 리포트</span>
+  </div>
+  <div class="sidebar-item" data-page="place" onclick="go('place')">
+    <div class="sidebar-icon">📍</div><span>플레이스 진단</span>
+    <span class="sidebar-badge">N</span>
+  </div>
+
+  <div class="sidebar-section">Coming Soon</div>
+  <div class="sidebar-item" style="opacity:.4;cursor:default;">
+    <div class="sidebar-icon">📸</div><span>Instagram 분석</span>
+  </div>
+  <div class="sidebar-item" style="opacity:.4;cursor:default;">
+    <div class="sidebar-icon">📝</div><span>블로그 진단</span>
+  </div>
+
+  <div class="sidebar-bottom">
+    <p>브랜딩오토 v1.0<br>AI 브랜딩 자동화 플랫폼</p>
+  </div>
+</aside>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main">
+
+  <!-- ── HOME ── -->
+  <div id="pg-home" class="page on">
+    <div class="topbar">
+      <span class="topbar-title">대시보드</span>
+      <span class="topbar-sub">브랜딩 도구 모아보기</span>
+    </div>
+    <div class="dash-home">
+      <div class="dash-welcome">
+        <h1>브랜딩오토에 오신 걸 환영합니다</h1>
+        <p>AI 기반 브랜딩 분석 도구를 한 곳에서 사용하세요</p>
+      </div>
+
+      <div class="dash-stats">
+        <div class="stat-card">
+          <div class="label">사용 가능한 도구</div>
+          <div class="value">2<span style="font-size:14px;color:var(--text2)"> / 4</span></div>
+          <div class="sub">Threads 분석, 플레이스 진단</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">준비 중</div>
+          <div class="value" style="color:var(--accent2)">2</div>
+          <div class="sub">Instagram 분석, 블로그 진단</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">분석 비용</div>
+          <div class="value" style="color:var(--green)">무료</div>
+          <div class="sub">API 키 불필요</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:14px;">도구 선택</h3>
+      <div class="dash-tools">
+        <div class="tool-card" onclick="go('threads')">
+          <div class="tool-icon">@</div>
+          <h3>Threads 분석</h3>
+          <p>AI가 실시간으로 쓰레드 계정을 크롤링하고 성과를 분석합니다. 점수, 코칭, 콘텐츠 제안까지.</p>
+          <span class="tool-tag">무료 AI 분석</span>
+        </div>
+        <div class="tool-card" onclick="go('place')">
+          <div class="tool-icon">📍</div>
+          <h3>네이버 플레이스 진단</h3>
+          <p>네이버 플레이스 URL만 넣으면 세팅 상태를 진단하고 개선 방향을 알려드립니다.</p>
+          <span class="tool-tag">경쟁 비교 가능</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── THREADS ── -->
+  <div id="pg-threads" class="page">
+    <div class="topbar">
+      <span class="topbar-title">Threads 분석</span>
+      <span class="topbar-sub">AI 기반 쓰레드 계정 분석</span>
+    </div>
+    <div class="threads-page">
+      <h2>내 쓰레드, 몇 점일까?</h2>
+      <p class="desc">공개 계정을 실시간 크롤링하여 AI가 분석합니다</p>
+
+      <form id="threads-form" onsubmit="event.preventDefault();runThreads();">
+        <div class="form-group">
+          <label>쓰레드 계정</label>
+          <input type="text" class="form-input" id="t-user" placeholder="계정명 입력" required>
+        </div>
+        <div class="form-group">
+          <label>분야</label>
+          <select id="t-field" class="form-select">
+            <option value="AI / 스타트업">AI / 스타트업</option>
+            <option value="마케팅">마케팅</option>
+            <option value="금융 / 투자">금융 / 투자</option>
+            <option value="법률">법률</option>
+            <option value="의료">의료</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>목적</label>
+          <select id="t-goal" class="form-select">
+            <option value="퍼스널 브랜딩">퍼스널 브랜딩</option>
+            <option value="고객 유입">고객 유입</option>
+            <option value="투자자 어필">투자자 어필</option>
+            <option value="수익화">수익화</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary">무료 분석 시작</button>
+        <p class="note">공개 계정 실시간 크롤링 · API 키 불필요 · 무료</p>
+      </form>
+
+      <div id="t-loading" class="ld">
+        <div class="spinner"></div>
+        <p style="font-size:12px;color:var(--text2)">쓰레드 크롤링 + AI 분석 중...</p>
+        <p style="font-size:11px;color:#6b7280">최대 15초 소요</p>
+      </div>
+      <div id="t-error"></div>
+    </div>
+  </div>
+
+  <!-- ── THREADS REPORT ── -->
+  <div id="pg-threads-report" class="page">
+    <div class="topbar">
+      <span class="topbar-title">Threads 리포트</span>
+      <span class="topbar-sub">분석 결과</span>
+    </div>
+    <div class="report-page">
+      <div id="t-result"><p style="color:var(--text2);padding:40px 0;text-align:center;">아직 분석된 리포트가 없습니다. Threads 분석을 먼저 실행하세요.</p></div>
+    </div>
+  </div>
+
+  <!-- ── PLACE ── -->
+  <div id="pg-place" class="page">
+    <div class="topbar">
+      <span class="topbar-title">플레이스 진단</span>
+      <span class="topbar-sub">네이버 플레이스 세팅 분석</span>
+    </div>
+    <div class="place-page">
+      <h2>플레이스 진단</h2>
+      <p class="desc">네이버 플레이스 URL만 넣으면 세팅 상태를 바로 진단합니다</p>
+
+      <div class="place-tabs-row">
+        <button class="place-tab active" onclick="switchPlaceTab('single')">내 매장 진단</button>
+        <button class="place-tab" onclick="switchPlaceTab('compare')">경쟁매장 비교</button>
+      </div>
+
+      <!-- SINGLE -->
+      <div id="p-tab-single">
+        <div class="input-area">
+          <div class="input-row">
+            <input type="text" id="p-url" placeholder="매장 URL을 입력하세요 (네이버 플레이스)">
+            <button class="btn-place" id="p-analyze-btn" onclick="analyzePlaceSingle()">진단하기</button>
+          </div>
+        </div>
+        <div id="p-single-error"></div>
+        <div id="p-single-loading" class="loading-place hidden"><div class="spinner"></div><p>플레이스 정보를 분석하고 있습니다...</p></div>
+        <div id="p-single-result" class="hidden"></div>
+      </div>
+
+      <!-- COMPARE -->
+      <div id="p-tab-compare" class="hidden">
+        <div class="input-area">
+          <p style="margin-bottom:14px;color:var(--text2);font-size:13px;">비교할 매장 URL을 입력하세요 (최대 5개)</p>
+          <div class="compare-urls" id="p-compare-urls">
+            <div class="compare-url-row">
+              <input type="text" class="p-compare-input" placeholder="매장 1 URL">
+              <button class="remove-url" onclick="removePlaceUrl(this)">&times;</button>
+            </div>
+            <div class="compare-url-row">
+              <input type="text" class="p-compare-input" placeholder="매장 2 URL">
+              <button class="remove-url" onclick="removePlaceUrl(this)">&times;</button>
+            </div>
+          </div>
+          <div class="compare-actions">
+            <button class="btn-outline" onclick="addPlaceUrl()">+ URL 추가</button>
+            <button class="btn-place" id="p-compare-btn" onclick="analyzePlaceCompare()">비교 분석</button>
+          </div>
+        </div>
+        <div id="p-compare-error"></div>
+        <div id="p-compare-loading" class="loading-place hidden"><div class="spinner"></div><p>매장 정보를 비교 분석하고 있습니다...</p></div>
+        <div id="p-compare-result" class="hidden"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+/* ═══ NAVIGATION ═══ */
+function go(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.sidebar-item[data-page]').forEach(i => i.classList.remove('on'));
+  document.getElementById('pg-' + page).classList.add('on');
+  const si = document.querySelector(`.sidebar-item[data-page="${page}"]`);
+  if (si) si.classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+/* ═══ THREADS ═══ */
+async function runThreads() {
+  const u = document.getElementById('t-user').value.trim();
+  const f = document.getElementById('t-field').value;
+  const g = document.getElementById('t-goal').value;
+  if (!u) { document.getElementById('t-user').focus(); return; }
+
+  document.getElementById('threads-form').style.display = 'none';
+  document.getElementById('t-loading').classList.add('on');
+  document.getElementById('t-error').innerHTML = '';
+
+  try {
+    const r = await fetch('/api/threads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, field: f, goal: g })
+    });
+    const d = await r.json();
+    if (d.error) {
+      document.getElementById('t-error').innerHTML = `<div class="er-box"><p>${d.error}</p></div>`;
+    } else {
+      renderThreads(d);
+      go('threads-report');
+    }
+  } catch (e) {
+    document.getElementById('t-error').innerHTML = `<div class="er-box"><p>Error: ${e.message}</p></div>`;
+  } finally {
+    document.getElementById('threads-form').style.display = 'block';
+    document.getElementById('t-loading').classList.remove('on');
+  }
+}
+
+function renderThreads(d) {
+  const a = d.analysis, p = a.profile || {}, un = d.username;
+  const ini = un.substring(0, 2).toUpperCase();
+  const sc = a.score >= 75 ? '#10b981' : a.score >= 50 ? '#818cf8' : '#f59e0b';
+  const cats = Object.entries(a.categories);
+  const mx = cats.length ? cats[0][1].avg_eng : 1;
+
+  let catH = '';
+  cats.forEach(([n, d]) => {
+    const w = (d.avg_eng / mx * 100).toFixed(0);
+    catH += `<div class="cb"><div class="cr"><span class="n">${n}</span><span class="vl">avg ${d.avg_eng.toFixed(0)}</span></div><div class="bbg"><div class="bf" style="width:${w}%"></div></div></div>`;
+  });
+
+  let topH = '';
+  a.top5.slice(0, 5).forEach((p, i) => {
+    const t = p.text.length > 80 ? p.text.substring(0, 80) + '...' : p.text;
+    topH += `<div class="pc"><div class="rk rg">${i + 1}</div><div class="t">${t}</div><div class="e">&hearts; ${p.likes.toLocaleString()}</div></div>`;
+  });
+
+  let wstH = '';
+  const w5 = a.worst5.slice(-3);
+  w5.forEach((p, i) => {
+    const t = p.text.length > 80 ? p.text.substring(0, 80) + '...' : p.text;
+    wstH += `<div class="pc"><div class="rk rb">${a.total_posts - 2 + i}</div><div class="t">${t}</div><div class="e">&hearts; ${p.likes.toLocaleString()}</div></div>`;
+  });
+
+  let coH = '';
+  d.coaching.forEach(c => {
+    const tc = c.type === 'keep' ? 'tk' : 'ti', tl = c.type === 'keep' ? 'KEEP' : 'IMPROVE';
+    coH += `<div class="ci"><span class="tg ${tc}">${tl}</span><h4>${c.title}</h4><p>${c.suggestion}</p><p style="font-size:11px;color:#6b7280;margin-top:3px">${c.reason}</p></div>`;
+  });
+
+  let sgH = '';
+  d.suggestions.forEach(s => {
+    let cls = '', lb = 'Thread';
+    if (s.type === 'shorts') { cls = 'sh'; lb = 'Shorts'; }
+    if (s.type === 'blog') { cls = 'bl'; lb = 'Blog'; }
+    const esc = s.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    sgH += `<div class="sg"><span class="st ${cls}">${lb}</span><div class="tx">${s.text}</div><button class="cp-btn" onclick="cpy(this,'${esc}')">Copy</button></div>`;
+  });
+
+  const gap = cats.length > 1 ? (cats[0][1].avg_eng / cats[cats.length - 1][1].avg_eng).toFixed(1) + 'x' : '-';
+
+  document.getElementById('t-result').innerHTML = `
+  <div class="rh">
+    <div class="av">${ini}</div>
+    <div class="ri">
+      <h2>@${un}</h2>
+      <div class="mt">${p.name || un} · ${(p.followers || 0).toLocaleString()} followers · ${a.total_posts} posts scraped</div>
+      ${p.bio ? `<div class="mt" style="margin-top:4px">${p.bio}</div>` : ''}
+    </div>
+    <div class="sr" style="background:conic-gradient(${sc} 0% ${a.score}%,#1f2937 ${a.score}% 100%)">
+      <div class="si"><div class="gr">${a.grade}</div><div class="pt">${a.score}/100</div></div>
+    </div>
+  </div>
+  <div class="ms">
+    <div class="mc"><div class="v">${a.avg_likes.toFixed(0)}</div><div class="l">AVG Likes</div></div>
+    <div class="mc"><div class="v">${a.avg_replies.toFixed(0)}</div><div class="l">AVG Replies</div></div>
+    <div class="mc"><div class="v">${a.total_engagement.toLocaleString()}</div><div class="l">Total Eng.</div></div>
+    <div class="mc"><div class="v">${gap}</div><div class="l">Top/Bottom Gap</div></div>
+  </div>
+  <div class="sc"><h3>Category Performance</h3>${catH}</div>
+  <div class="sc"><h3>TOP 5</h3>${topH}</div>
+  <div class="sc"><h3>WORST 3</h3>${wstH}</div>
+  <div class="sc sa"><h3>AI Coaching</h3>${coH}</div>
+  <div class="sc"><h3>Content Suggestions</h3>${sgH}</div>
+  <div class="cta-box">
+    <h3>다른 계정도 분석해보세요</h3>
+    <p>공개 쓰레드 계정이면 누구든 무료 분석 가능</p>
+    <button class="btn-primary" style="width:auto;padding:10px 32px" onclick="go('threads')">새 분석</button>
+  </div>`;
+}
+
+function cpy(b, t) {
+  navigator.clipboard.writeText(t).then(() => {
+    b.textContent = 'OK!'; b.classList.add('ok');
+    setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('ok'); }, 1200);
+  });
+}
+
+/* ═══ PLACE ═══ */
+function switchPlaceTab(tab) {
+  document.querySelectorAll('.place-tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'single' ? i === 0 : i === 1));
+  });
+  document.getElementById('p-tab-single').classList.toggle('hidden', tab !== 'single');
+  document.getElementById('p-tab-compare').classList.toggle('hidden', tab !== 'compare');
+}
+
+async function analyzePlaceSingle() {
+  const url = document.getElementById('p-url').value.trim();
+  if (!url) return;
+  const btn = document.getElementById('p-analyze-btn');
+  btn.disabled = true;
+  showEl('p-single-loading'); hideEl('p-single-result'); hideEl('p-single-error');
+  try {
+    const resp = await fetch('/api/place', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    const data = await resp.json();
+    if (data.error) showPlaceError('p-single-error', data.error);
+    else renderPlaceResult('p-single-result', data);
+  } catch (e) { showPlaceError('p-single-error', '서버 연결에 실패했습니다.'); }
+  hideEl('p-single-loading'); btn.disabled = false;
+}
+
+function addPlaceUrl() {
+  const wrap = document.getElementById('p-compare-urls');
+  if (wrap.children.length >= 5) return;
+  const div = document.createElement('div');
+  div.className = 'compare-url-row';
+  div.innerHTML = `<input type="text" class="p-compare-input" placeholder="매장 ${wrap.children.length + 1} URL"><button class="remove-url" onclick="removePlaceUrl(this)">&times;</button>`;
+  wrap.appendChild(div);
+}
+
+function removePlaceUrl(btn) {
+  const wrap = document.getElementById('p-compare-urls');
+  if (wrap.children.length <= 2) return;
+  btn.parentElement.remove();
+}
+
+async function analyzePlaceCompare() {
+  const inputs = document.querySelectorAll('.p-compare-input');
+  const urls = Array.from(inputs).map(i => i.value.trim()).filter(Boolean);
+  if (urls.length < 2) { showPlaceError('p-compare-error', '최소 2개의 URL을 입력해주세요.'); return; }
+  const btn = document.getElementById('p-compare-btn');
+  btn.disabled = true;
+  showEl('p-compare-loading'); hideEl('p-compare-result'); hideEl('p-compare-error');
+  const results = [];
+  for (const url of urls) {
+    try {
+      const resp = await fetch('/api/place', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url}) });
+      const data = await resp.json();
+      results.push(data.error ? { error: data.error, url } : data);
+    } catch (e) { results.push({ error: '분석 실패', url }); }
+  }
+  const valid = results.filter(r => !r.error);
+  if (valid.length < 2) showPlaceError('p-compare-error', '분석 가능한 매장이 2개 미만입니다.');
+  else renderPlaceCompare('p-compare-result', valid);
+  hideEl('p-compare-loading'); btn.disabled = false;
+}
+
+function renderPlaceResult(id, data) {
+  const el = document.getElementById(id);
+  const pd = data.place_data;
+  const cats = ['basic','photo','menu','description','review','extra'];
+  const catIcons = {basic:'📋',photo:'📸',menu:'🍽️',description:'✏️',review:'⭐',extra:'🔧'};
+  let scoreCardsHtml = cats.map(key => {
+    const s = data.scores[key];
+    const pct = s.max > 0 ? (s.score / s.max) * 100 : 0;
+    const color = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+    const detailsHtml = s.details.map(d => `<div class="score-detail"><span>${d.ok ? '<span class="check">✓</span>' : '<span class="cross">✕</span>'} ${d.name}</span><span>${d.score}/${d.max}</span></div>`).join('');
+    return `<div class="score-card"><div class="label">${catIcons[key]} ${s.label}</div><div class="value" style="color:${color}">${s.score}<span style="font-size:14px;color:var(--text2)">/${s.max}</span></div><div class="score-bar"><div class="score-bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="score-details">${detailsHtml}</div></div>`;
+  }).join('');
+  const recsHtml = data.recommendations.length > 0 ? data.recommendations.map(r => `<div class="rec-item"><span class="rec-badge ${r.priority}">${r.priority==='high'?'긴급':r.priority==='mid'?'권장':'참고'}</span><span class="rec-text">${r.text}</span></div>`).join('') : '<p style="color:var(--text2);text-align:center;padding:20px;">모든 항목이 잘 설정되어 있습니다!</p>';
+  const photoHtml = pd.representative_photo_url ? `<img class="place-photo" src="${pd.representative_photo_url}" alt="${pd.name}">` : `<div class="place-photo" style="display:flex;align-items:center;justify-content:center;font-size:28px;">🏪</div>`;
+  el.innerHTML = `<div class="result">
+    <div class="place-header-card">${photoHtml}<div class="place-info"><h2>${pd.name||'알 수 없음'}</h2><div class="meta">${pd.category?`<span>📂 ${pd.category}</span>`:''}${pd.address?`<span>📍 ${pd.address}</span>`:''}${pd.phone?`<span>📞 ${pd.phone}</span>`:''}</div></div></div>
+    <div class="grade-section"><div class="grade-card"><div class="grade-circle" style="border-color:${data.grade_color}"><div class="grade-letter" style="color:${data.grade_color}">${data.grade}</div><div class="grade-pct" style="color:${data.grade_color}">${data.percentage}점</div></div><div class="grade-text">${data.grade_text}</div><div class="grade-score-text">${data.total_score} / ${data.total_max}</div></div><div class="grade-card"><canvas id="radar-single" width="280" height="280"></canvas></div></div>
+    <div class="scores-grid">${scoreCardsHtml}</div>
+    <div class="recs-card"><h3>💡 개선 추천사항</h3>${recsHtml}</div></div>`;
+  showEl(id);
+  const ctx = document.getElementById('radar-single');
+  if (ctx) new Chart(ctx, { type:'radar', data:{ labels:cats.map(k=>data.scores[k].label), datasets:[{ label:pd.name, data:cats.map(k=>{const s=data.scores[k];return s.max>0?Math.round((s.score/s.max)*100):0;}), backgroundColor:'rgba(99,102,241,.2)', borderColor:'rgba(99,102,241,.8)', borderWidth:2, pointBackgroundColor:'rgba(99,102,241,1)' }]}, options:{ scales:{ r:{ beginAtZero:true, max:100, grid:{color:'rgba(255,255,255,.08)'}, angleLines:{color:'rgba(255,255,255,.08)'}, pointLabels:{color:'#8b8fa3',font:{size:12,weight:'600'}}, ticks:{display:false}}}, plugins:{legend:{display:false}}} });
+}
+
+const CHART_COLORS = ['#6366f1','#10b981','#ef4444','#f59e0b','#a78bfa'];
+
+function renderPlaceCompare(id, results) {
+  const el = document.getElementById(id);
+  const cats = ['basic','photo','menu','description','review','extra'];
+  const maxTotal = Math.max(...results.map(r => r.percentage));
+  let tableRows = '<tr><td style="font-weight:700">종합 등급</td>' + results.map(r => `<td><span class="compare-grade" style="background:${r.grade_color}22;color:${r.grade_color}">${r.grade}</span></td>`).join('') + '</tr>';
+  tableRows += '<tr><td>총점</td>' + results.map(r => `<td class="${r.percentage===maxTotal?'winner':'loser'}">${r.percentage}점</td>`).join('') + '</tr>';
+  for (const key of cats) {
+    const label = results[0].scores[key].label;
+    const vals = results.map(r => r.scores[key]);
+    const maxS = Math.max(...vals.map(v => v.score));
+    tableRows += `<tr><td>${label}</td>` + vals.map(v => `<td class="${v.score===maxS&&results.length>1?'winner':(v.score<maxS?'loser':'')}">${v.score}/${v.max}</td>`).join('') + '</tr>';
+  }
+  [['사진 수',r=>r.place_data.photo_count+'장'],['메뉴 수',r=>r.place_data.menu_count+'개'],['리뷰 수',r=>r.place_data.review_count+'개'],['별점',r=>r.place_data.review_rating>0?r.place_data.review_rating.toFixed(1):'-'],['소개글',r=>r.place_data.description_length>0?r.place_data.description_length+'자':'미작성']].forEach(([label,fn]) => {
+    tableRows += `<tr><td>${label}</td>` + results.map(r => `<td>${fn(r)}</td>`).join('') + '</tr>';
+  });
+  const headerCells = results.map((r,i) => `<th style="color:${CHART_COLORS[i]}">${r.place_data.name||('매장 '+(i+1))}</th>`).join('');
+  el.innerHTML = `<div class="compare-result"><div class="chart-wrap"><h3>항목별 비교</h3><canvas id="radar-compare"></canvas></div><div class="compare-table-wrap"><h3>상세 비교표</h3><table class="compare-table"><thead><tr><th>항목</th>${headerCells}</tr></thead><tbody>${tableRows}</tbody></table></div></div>`;
+  showEl(id);
+  const ctx = document.getElementById('radar-compare');
+  if (ctx) new Chart(ctx, { type:'radar', data:{ labels:cats.map(k=>results[0].scores[k].label), datasets:results.map((r,i)=>({ label:r.place_data.name||('매장 '+(i+1)), data:cats.map(k=>{const s=r.scores[k];return s.max>0?Math.round((s.score/s.max)*100):0;}), backgroundColor:CHART_COLORS[i]+'22', borderColor:CHART_COLORS[i], borderWidth:2, pointBackgroundColor:CHART_COLORS[i] }))}, options:{ scales:{ r:{ beginAtZero:true, max:100, grid:{color:'rgba(255,255,255,.08)'}, angleLines:{color:'rgba(255,255,255,.08)'}, pointLabels:{color:'#8b8fa3',font:{size:12,weight:'600'}}, ticks:{display:false}}}, plugins:{legend:{labels:{color:'#e4e6ed',font:{size:12}}}}} });
+}
+
+/* ═══ UTIL ═══ */
+function showEl(id) { document.getElementById(id).classList.remove('hidden'); }
+function hideEl(id) { document.getElementById(id).classList.add('hidden'); }
+function showPlaceError(id, msg) { document.getElementById(id).innerHTML = `<div class="error-box">${msg}</div>`; showEl(id); }
+</script>
+
+</body>
+</html>
