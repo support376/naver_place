@@ -1,6 +1,11 @@
 {
   "rewrites": [
     { "source": "/api/threads", "destination": "/api/threads.js" },
-    { "source": "/api/place", "destination": "/api/place.js" }
+    { "source": "/api/place", "destination": "/api/place.js" },
+    { "source": "/api/ai-analyze", "destination": "/api/ai-analyze.js" },
+    { "source": "/api/find-competitors", "destination": "/api/find-competitors.js" },
+    { "source": "/api/agency-request", "destination": "/api/agency-request.js" },
+    { "source": "/api/create-order", "destination": "/api/create-order.js" },
+    { "source": "/api/toss-config", "destination": "/api/toss-config.js" }
   ]
 }

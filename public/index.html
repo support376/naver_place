@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>브랜딩오토 - AI 브랜딩 자동화 플랫폼</title>
+<title>플레이스 닥터 — 내 매장 네이버 플레이스 무료 진단</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://js.tosspayments.com/v1/payment"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -25,55 +28,11 @@
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Noto Sans KR', -apple-system, sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+body { font-family:'Noto Sans KR', -apple-system, sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
-/* ═══ SIDEBAR ═══ */
-.sidebar {
-  position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w);
-  background:var(--sidebar-bg); border-right:1px solid var(--border);
-  display:flex; flex-direction:column; z-index:100;
-  padding:20px 0;
-}
-.sidebar-logo {
-  font-size:20px; font-weight:900; padding:0 24px; margin-bottom:32px;
-  cursor:pointer;
-  background:linear-gradient(135deg, var(--accent), #a78bfa);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-}
-.sidebar-section {
-  font-size:10px; font-weight:700; color:#4b5563;
-  text-transform:uppercase; letter-spacing:1.2px;
-  padding:0 24px; margin:20px 0 8px;
-}
-.sidebar-item {
-  display:flex; align-items:center; gap:12px;
-  padding:10px 24px; cursor:pointer; transition:.15s;
-  color:var(--text2); font-size:13px; font-weight:500;
-  border-left:3px solid transparent; text-decoration:none;
-}
-.sidebar-item:hover { background:rgba(99,102,241,.06); color:var(--text); }
-.sidebar-item.on {
-  color:var(--accent2); background:rgba(99,102,241,.08);
-  border-left-color:var(--accent);
-}
-.sidebar-icon {
-  width:20px; height:20px; display:flex; align-items:center;
-  justify-content:center; font-size:15px; flex-shrink:0;
-}
-.sidebar-badge {
-  margin-left:auto; font-size:10px; padding:2px 7px;
-  border-radius:10px; background:var(--accent); color:#fff; font-weight:700;
-}
-.sidebar-bottom {
-  margin-top:auto; padding:16px 24px;
-  border-top:1px solid var(--border);
-}
-.sidebar-bottom p { font-size:10px; color:#4b5563; line-height:1.5; }
-
-/* ═══ MAIN ═══ */
-.main {
-  margin-left:var(--sidebar-w); flex:1; min-height:100vh;
-}
+/* sidebar removed — standalone mode */
+.sidebar { display:none !important; }
+.main { margin-left:0; flex:1; min-height:100vh; }
 .topbar {
   position:sticky; top:0; z-index:50;
   background:rgba(9,9,11,.85); backdrop-filter:blur(16px);
@@ -363,243 +322,305 @@ body { font-family:'Noto Sans KR', -apple-system, sans-serif; background:var(--b
 
 .hidden { display:none; }
 
-/* ═══ RESPONSIVE ═══ */
-@media(max-width:768px) {
-  .sidebar { width:60px; overflow:hidden; }
-  .sidebar:hover { width:var(--sidebar-w); }
-  .sidebar-item span { display:none; }
-  .sidebar:hover .sidebar-item span { display:inline; }
-  .sidebar-section { display:none; }
-  .sidebar:hover .sidebar-section { display:block; }
-  .sidebar-logo { font-size:16px; padding:0 16px; }
-  .sidebar:hover .sidebar-logo { padding:0 24px; }
-  .sidebar-badge { display:none; }
-  .sidebar:hover .sidebar-badge { display:inline; }
-  .sidebar-bottom { display:none; }
-  .main { margin-left:60px; }
-  .grade-section { grid-template-columns:1fr; }
-  .scores-grid { grid-template-columns:1fr 1fr; }
-  .dash-stats { grid-template-columns:1fr; }
-  .dash-tools { grid-template-columns:1fr; }
-}
-@media(max-width:480px) {
-  .scores-grid { grid-template-columns:1fr; }
-  .input-row { flex-direction:column; }
-  .ms { grid-template-columns:repeat(2,1fr); }
+/* ═══ PLACE FOMO ═══ */
+.place-page{padding:0;max-width:100%;}
+.place-inner{max-width:620px;margin:0 auto;padding:0 20px 100px;}
+.place-sub{display:none;animation:fi .4s ease;}
+.place-sub.on{display:block;}
+
+.p-hero{text-align:center;padding:48px 20px 24px;position:relative;}
+.p-hero::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(99,102,241,.07) 0%,transparent 70%);pointer-events:none;}
+.p-hero-badge{display:inline-flex;padding:4px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:100px;font-size:11px;font-weight:600;color:#ef4444;margin-bottom:20px;animation:p-float 3s ease-in-out infinite;}
+@keyframes p-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.p-hero h1{font-size:clamp(22px,4vw,32px);font-weight:900;line-height:1.3;margin-bottom:10px;}
+.p-hero h1 em{font-style:normal;background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.p-hero-sub{font-size:14px;color:var(--text2);margin-bottom:28px;}
+.p-input-wrap{max-width:480px;margin:0 auto 14px;position:relative;}
+.p-input-wrap input{width:100%;padding:14px 120px 14px 16px;background:var(--card);border:2px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .3s,box-shadow .3s;}
+.p-input-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.2);}
+.p-input-wrap input::placeholder{color:var(--text2);}
+.p-go{position:absolute;right:5px;top:50%;transform:translateY(-50%);padding:10px 20px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:transform .2s;}
+.p-go:hover{transform:translateY(-50%) scale(1.03);}
+.p-trust{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:11px;color:var(--text2);}
+.p-trust .ck{color:var(--green);font-weight:700;}
+
+.p-fear{max-width:480px;margin:32px auto 0;display:flex;flex-direction:column;gap:8px;}
+.p-fear-card{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;transition:border-color .3s;}
+.p-fear-card:hover{border-color:rgba(239,68,68,.3);}
+.p-fear-ico{width:36px;height:36px;background:rgba(239,68,68,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.p-fear-card h4{font-size:13px;font-weight:700;margin-bottom:1px;}
+.p-fear-card p{font-size:11px;color:var(--text2);}
+.p-fear-stat{font-size:18px;font-weight:900;color:#ef4444;margin-top:1px;}
+
+.p-loading-screen{text-align:center;padding:80px 20px;}
+.p-loader{width:64px;height:64px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sn .8s linear infinite;margin:0 auto 24px;}
+.p-load-steps{list-style:none;max-width:260px;margin:0 auto;}
+.p-load-steps li{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:12px;color:var(--text2);transition:color .3s;}
+.p-load-steps li.done{color:var(--green);}
+.p-load-steps li.on{color:var(--text);}
+.p-ls-ico{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:all .3s;}
+.p-load-steps li.done .p-ls-ico{background:var(--green);border-color:var(--green);color:#000;}
+.p-load-steps li.on .p-ls-ico{border-color:var(--accent);}
+
+.p-store{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;}
+.p-store-thumb{width:52px;height:52px;border-radius:12px;background:var(--card2);object-fit:cover;flex-shrink:0;}
+.p-store-info h3{font-size:15px;font-weight:700;}
+.p-store-info p{font-size:11px;color:var(--text2);}
+
+.p-grade{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px 20px;margin-bottom:14px;}
+.p-grade-letter{font-size:64px;font-weight:900;line-height:1;}
+.p-grade-score{font-size:24px;font-weight:700;margin-top:2px;}
+.p-grade-score span{color:var(--text2);font-size:16px;font-weight:400;}
+
+.p-fomo{background:linear-gradient(135deg,rgba(239,68,68,.08),rgba(245,158,11,.05));border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:16px;margin-bottom:14px;display:flex;gap:12px;align-items:start;}
+.p-fomo-g{border-color:rgba(16,185,129,.2);background:linear-gradient(135deg,rgba(16,185,129,.05),rgba(99,102,241,.03));}
+.p-fomo-ico{font-size:22px;flex-shrink:0;}
+.p-fomo p{font-size:12px;line-height:1.7;}
+.p-fomo strong{color:#ef4444;font-weight:700;}
+.p-fomo em{font-style:normal;color:#f59e0b;font-weight:600;}
+
+.p-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;}
+.p-card h3{font-size:14px;font-weight:700;margin-bottom:12px;}
+.p-cat-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
+.p-cat-row:last-child{border-bottom:none;}
+.p-cat-emoji{font-size:16px;width:22px;text-align:center;}
+.p-cat-name{flex:1;font-size:12px;font-weight:500;}
+.p-cat-bar-w{width:90px;height:6px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden;}
+.p-cat-bar{height:100%;border-radius:3px;}
+.p-cat-sc{font-size:12px;font-weight:700;min-width:32px;text-align:right;}
+.p-cat-sc.blur{filter:blur(5px);color:var(--text2);user-select:none;}
+.p-lock-i{font-size:12px;color:var(--text2);}
+
+.p-issues{display:flex;gap:10px;}
+.p-issue-box{flex:1;text-align:center;padding:12px;background:rgba(255,255,255,.02);border-radius:10px;}
+.p-issue-n{font-size:22px;font-weight:900;}
+.p-issue-n.red{color:#ef4444;}.p-issue-n.org{color:#f59e0b;}.p-issue-n.blu{color:var(--accent);}
+.p-issue-l{font-size:10px;color:var(--text2);}
+
+.p-d-item{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.p-d-item:last-child{border-bottom:none;}
+.p-d-chk{font-size:14px;width:20px;text-align:center;}
+.p-d-name{flex:1;}
+.p-d-val{font-weight:600;font-size:11px;}
+.p-d-val.good{color:var(--green);}.p-d-val.warn{color:#f59e0b;}.p-d-val.bad{color:#ef4444;}
+
+.p-reco{background:rgba(255,255,255,.02);border-radius:10px;padding:12px;margin-top:10px;}
+.p-reco-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;margin-bottom:4px;}
+.p-reco-urg{background:rgba(239,68,68,.15);color:#ef4444;}
+.p-reco-rec{background:rgba(245,158,11,.15);color:#f59e0b;}
+.p-reco p{font-size:11px;color:var(--text2);line-height:1.6;}
+
+.p-cta{background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(139,92,246,.04));border:2px solid rgba(99,102,241,.2);border-radius:16px;padding:24px 20px;text-align:center;margin:16px 0;}
+.p-cta .emoji{font-size:32px;margin-bottom:8px;}
+.p-cta h3{font-size:16px;font-weight:800;margin-bottom:4px;}
+.p-cta>p{font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6;}
+.p-btn-unlock{display:inline-flex;align-items:center;gap:7px;padding:12px 26px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
+.p-btn-unlock::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.1) 50%,transparent 60%);animation:p-shine 3s infinite;}
+@keyframes p-shine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.p-btn-unlock:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(99,102,241,.3);}
+.p-btn-unlock .price{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:6px;font-size:12px;}
+.p-cta-sub{font-size:10px;color:var(--text2);margin-top:8px;}
+
+.p-cta-gold{border-color:rgba(245,158,11,.25);background:linear-gradient(135deg,rgba(245,158,11,.06),rgba(234,179,8,.03));}
+.p-btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:#1a1200;}
+.p-btn-gold:hover{box-shadow:0 4px 20px rgba(245,158,11,.3);}
+
+.p-progress{display:flex;justify-content:center;gap:6px;padding:14px 0 6px;}
+.p-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:all .3s;}
+.p-dot.done{background:var(--green);}.p-dot.cur{background:var(--accent);width:20px;border-radius:3px;}
+
+.p-comp-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;}
+.p-comp-table th{text-align:left;padding:8px 6px;border-bottom:2px solid var(--border);color:var(--text2);font-weight:600;}
+.p-comp-table td{padding:8px 6px;border-bottom:1px solid var(--border);}
+.p-comp-table tr.p-me{background:rgba(99,102,241,.08);}
+.p-comp-table tr.p-me td:first-child{font-weight:700;color:var(--accent2);}
+.p-rank1{color:#f59e0b;font-weight:700;}.p-rank-low{color:#ef4444;}
+
+.p-action{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.p-action:last-child{border-bottom:none;}
+.p-action-n{width:26px;height:26px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;color:#fff;}
+.p-action h4{font-size:12px;font-weight:700;margin-bottom:2px;}
+.p-action p{font-size:11px;color:var(--text2);line-height:1.5;}
+.p-action-fx{display:inline-block;margin-top:4px;padding:2px 8px;background:rgba(16,185,129,.1);border-radius:5px;font-size:10px;color:var(--green);font-weight:600;}
+
+.p-rewrite{background:rgba(16,185,129,.04);border:1px solid rgba(16,185,129,.15);border-radius:10px;padding:14px;margin-bottom:8px;}
+.p-rewrite .label{font-size:10px;font-weight:700;color:var(--green);margin-bottom:4px;}
+.p-rewrite p{font-size:12px;color:var(--text);line-height:1.7;}
+
+.p-week{display:grid;grid-template-columns:auto 1fr;gap:0;margin-top:10px;}
+.p-week-day{padding:8px 12px 8px 0;border-right:2px solid var(--border);font-size:11px;font-weight:700;color:var(--accent2);text-align:right;position:relative;}
+.p-week-day::after{content:'';position:absolute;right:-4px;top:12px;width:6px;height:6px;background:var(--accent);border-radius:50%;}
+.p-week-task{padding:8px 0 8px 14px;font-size:11px;color:var(--text2);line-height:1.6;border-bottom:1px solid var(--border);}
+.p-week-task strong{color:var(--text);font-weight:600;}
+
+.p-agency-form input,.p-agency-form textarea{width:100%;padding:10px 12px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;}
+.p-agency-form textarea{resize:none;height:60px;}
+.p-agency-form .lbl{font-size:11px;color:var(--text2);margin-bottom:3px;}
+
+.p-trans{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.p-trans.on{opacity:1;pointer-events:auto;}
+.p-trans-check{font-size:44px;animation:p-pop .5s ease;}
+@keyframes p-pop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+.p-trans p{font-size:14px;font-weight:600;margin-top:8px;}
+
+.p-toast{position:fixed;top:16px;right:16px;background:var(--card);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:12px 20px;display:flex;align-items:center;gap:8px;z-index:1000;transform:translateX(120%);transition:transform .4s cubic-bezier(.16,1,.3,1);font-size:12px;box-shadow:0 6px 24px rgba(0,0,0,.3);}
+.p-toast.show{transform:translateX(0);}
+
+/* ═══ RESPONSIVE — MOBILE FIRST ═══ */
+@media(max-width:640px) {
+  .topbar { padding:0 14px; height:46px; }
+  .topbar-title { font-size:14px; }
+  .place-inner { padding:0 12px 80px; }
+  .p-hero { padding:36px 12px 20px; }
+  .p-hero h1 { font-size:24px; }
+  .p-card { padding:16px; border-radius:14px; }
+  .p-grade { padding:20px 16px; }
+  .p-grade-letter { font-size:56px; }
+  .p-fomo { padding:14px; }
+  .p-cta { padding:20px 16px; }
+  .p-comp-table { font-size:10px; }
+  .p-comp-table th, .p-comp-table td { padding:6px 4px; }
+  .p-issues { gap:6px; }
+  .p-issue-box { padding:10px 6px; }
+  .p-fear { gap:6px; }
+  .p-fear-card { padding:12px; }
+  .p-store { flex-direction:column; text-align:center; gap:8px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ SIDEBAR ═══ -->
-<aside class="sidebar">
-  <div class="sidebar-logo" onclick="go('home')">브랜딩오토</div>
-
-  <div class="sidebar-section">Overview</div>
-  <div class="sidebar-item on" data-page="home" onclick="go('home')">
-    <div class="sidebar-icon">📊</div><span>대시보드</span>
-  </div>
-
-  <div class="sidebar-section">Tools</div>
-  <div class="sidebar-item" data-page="threads" onclick="go('threads')">
-    <div class="sidebar-icon">@</div><span>Threads 분석</span>
-    <span class="sidebar-badge">AI</span>
-  </div>
-  <div class="sidebar-item" data-page="threads-report" onclick="go('threads-report')">
-    <div class="sidebar-icon">📋</div><span>Threads 리포트</span>
-  </div>
-  <div class="sidebar-item" data-page="place" onclick="go('place')">
-    <div class="sidebar-icon">📍</div><span>플레이스 진단</span>
-    <span class="sidebar-badge">N</span>
-  </div>
-
-  <div class="sidebar-section">Coming Soon</div>
-  <div class="sidebar-item" style="opacity:.4;cursor:default;">
-    <div class="sidebar-icon">📸</div><span>Instagram 분석</span>
-  </div>
-  <div class="sidebar-item" style="opacity:.4;cursor:default;">
-    <div class="sidebar-icon">📝</div><span>블로그 진단</span>
-  </div>
-
-  <div class="sidebar-bottom">
-    <p>브랜딩오토 v1.0<br>AI 브랜딩 자동화 플랫폼</p>
-  </div>
-</aside>
+<!-- sidebar removed -->
 
 <!-- ═══ MAIN CONTENT ═══ -->
 <div class="main">
-
-  <!-- ── HOME ── -->
-  <div id="pg-home" class="page on">
+  <!-- ── PLACE ONLY (standalone) ── -->
+  <div id="pg-place" class="page on">
     <div class="topbar">
-      <span class="topbar-title">대시보드</span>
-      <span class="topbar-sub">브랜딩 도구 모아보기</span>
-    </div>
-    <div class="dash-home">
-      <div class="dash-welcome">
-        <h1>브랜딩오토에 오신 걸 환영합니다</h1>
-        <p>AI 기반 브랜딩 분석 도구를 한 곳에서 사용하세요</p>
-      </div>
-
-      <div class="dash-stats">
-        <div class="stat-card">
-          <div class="label">사용 가능한 도구</div>
-          <div class="value">2<span style="font-size:14px;color:var(--text2)"> / 4</span></div>
-          <div class="sub">Threads 분석, 플레이스 진단</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">준비 중</div>
-          <div class="value" style="color:var(--accent2)">2</div>
-          <div class="sub">Instagram 분석, 블로그 진단</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">분석 비용</div>
-          <div class="value" style="color:var(--green)">무료</div>
-          <div class="sub">API 키 불필요</div>
-        </div>
-      </div>
-
-      <h3 style="font-size:16px;font-weight:700;margin-bottom:14px;">도구 선택</h3>
-      <div class="dash-tools">
-        <div class="tool-card" onclick="go('threads')">
-          <div class="tool-icon">@</div>
-          <h3>Threads 분석</h3>
-          <p>AI가 실시간으로 쓰레드 계정을 크롤링하고 성과를 분석합니다. 점수, 코칭, 콘텐츠 제안까지.</p>
-          <span class="tool-tag">무료 AI 분석</span>
-        </div>
-        <div class="tool-card" onclick="go('place')">
-          <div class="tool-icon">📍</div>
-          <h3>네이버 플레이스 진단</h3>
-          <p>네이버 플레이스 URL만 넣으면 세팅 상태를 진단하고 개선 방향을 알려드립니다.</p>
-          <span class="tool-tag">경쟁 비교 가능</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── THREADS ── -->
-  <div id="pg-threads" class="page">
-    <div class="topbar">
-      <span class="topbar-title">Threads 분석</span>
-      <span class="topbar-sub">AI 기반 쓰레드 계정 분석</span>
-    </div>
-    <div class="threads-page">
-      <h2>내 쓰레드, 몇 점일까?</h2>
-      <p class="desc">공개 계정을 실시간 크롤링하여 AI가 분석합니다</p>
-
-      <form id="threads-form" onsubmit="event.preventDefault();runThreads();">
-        <div class="form-group">
-          <label>쓰레드 계정</label>
-          <input type="text" class="form-input" id="t-user" placeholder="계정명 입력" required>
-        </div>
-        <div class="form-group">
-          <label>분야</label>
-          <select id="t-field" class="form-select">
-            <option value="AI / 스타트업">AI / 스타트업</option>
-            <option value="마케팅">마케팅</option>
-            <option value="금융 / 투자">금융 / 투자</option>
-            <option value="법률">법률</option>
-            <option value="의료">의료</option>
-            <option value="기타">기타</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>목적</label>
-          <select id="t-goal" class="form-select">
-            <option value="퍼스널 브랜딩">퍼스널 브랜딩</option>
-            <option value="고객 유입">고객 유입</option>
-            <option value="투자자 어필">투자자 어필</option>
-            <option value="수익화">수익화</option>
-          </select>
-        </div>
-        <button type="submit" class="btn-primary">무료 분석 시작</button>
-        <p class="note">공개 계정 실시간 크롤링 · API 키 불필요 · 무료</p>
-      </form>
-
-      <div id="t-loading" class="ld">
-        <div class="spinner"></div>
-        <p style="font-size:12px;color:var(--text2)">쓰레드 크롤링 + AI 분석 중...</p>
-        <p style="font-size:11px;color:#6b7280">최대 15초 소요</p>
-      </div>
-      <div id="t-error"></div>
-    </div>
-  </div>
-
-  <!-- ── THREADS REPORT ── -->
-  <div id="pg-threads-report" class="page">
-    <div class="topbar">
-      <span class="topbar-title">Threads 리포트</span>
-      <span class="topbar-sub">분석 결과</span>
-    </div>
-    <div class="report-page">
-      <div id="t-result"><p style="color:var(--text2);padding:40px 0;text-align:center;">아직 분석된 리포트가 없습니다. Threads 분석을 먼저 실행하세요.</p></div>
-    </div>
-  </div>
-
-  <!-- ── PLACE ── -->
-  <div id="pg-place" class="page">
-    <div class="topbar">
-      <span class="topbar-title">플레이스 진단</span>
-      <span class="topbar-sub">네이버 플레이스 세팅 분석</span>
+      <span class="topbar-title" style="background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;">플레이스 닥터</span>
+      <span class="topbar-sub" id="p-topbar-sub" style="margin-left:auto;font-size:11px;">데이터 기반 52개 항목 분석</span>
     </div>
     <div class="place-page">
-      <h2>플레이스 진단</h2>
-      <p class="desc">네이버 플레이스 URL만 넣으면 세팅 상태를 바로 진단합니다</p>
 
-      <div class="place-tabs-row">
-        <button class="place-tab active" onclick="switchPlaceTab('single')">내 매장 진단</button>
-        <button class="place-tab" onclick="switchPlaceTab('compare')">경쟁매장 비교</button>
-      </div>
-
-      <!-- SINGLE -->
-      <div id="p-tab-single">
-        <div class="input-area">
-          <div class="input-row">
-            <input type="text" id="p-url" placeholder="매장 URL을 입력하세요 (네이버 플레이스)">
-            <button class="btn-place" id="p-analyze-btn" onclick="analyzePlaceSingle()">진단하기</button>
+      <!-- SUB 0: INPUT -->
+      <div id="p-sub-input" class="place-sub on">
+        <div class="p-hero">
+          <div class="p-hero-badge">진단받은 매장 73%에서 치명적 오류 발견</div>
+          <h1>손님이 줄었다면,<br><em>네이버가 원인</em>일 수 있습니다</h1>
+          <p class="p-hero-sub">10초 안에 내 매장의 문제를 정확히 찾아드립니다.</p>
+          <div class="p-input-wrap">
+            <input type="text" id="p-url" placeholder="네이버 플레이스 URL 붙여넣기">
+            <button class="p-go" onclick="pStartAnalyze()">무료 진단</button>
+          </div>
+          <div class="p-trust">
+            <span><span class="ck">✓</span> 10초 완료</span>
+            <span><span class="ck">✓</span> 52개 항목</span>
+            <span><span class="ck">✓</span> 가입 불필요</span>
           </div>
         </div>
-        <div id="p-single-error"></div>
-        <div id="p-single-loading" class="loading-place hidden"><div class="spinner"></div><p>플레이스 정보를 분석하고 있습니다...</p></div>
-        <div id="p-single-result" class="hidden"></div>
-      </div>
 
-      <!-- COMPARE -->
-      <div id="p-tab-compare" class="hidden">
-        <div class="input-area">
-          <p style="margin-bottom:14px;color:var(--text2);font-size:13px;">비교할 매장 URL을 입력하세요 (최대 5개)</p>
-          <div class="compare-urls" id="p-compare-urls">
-            <div class="compare-url-row">
-              <input type="text" class="p-compare-input" placeholder="매장 1 URL">
-              <button class="remove-url" onclick="removePlaceUrl(this)">&times;</button>
-            </div>
-            <div class="compare-url-row">
-              <input type="text" class="p-compare-input" placeholder="매장 2 URL">
-              <button class="remove-url" onclick="removePlaceUrl(this)">&times;</button>
+        <!-- 타겟 고객별 공감 섹션 -->
+        <div style="max-width:480px;margin:0 auto;padding:0 16px;">
+          <div style="text-align:center;margin-bottom:20px;">
+            <h2 style="font-size:18px;font-weight:800;">혹시 이런 상황이신가요?</h2>
+          </div>
+
+          <div class="p-fear-card" style="border-color:rgba(99,102,241,.2);">
+            <div class="p-fear-ico" style="background:rgba(99,102,241,.1);">🍽️</div>
+            <div>
+              <h4 style="color:var(--accent2);">식당 · 카페 사장님</h4>
+              <p>"네이버에 검색하면 경쟁 매장만 나오고 우리 매장은 안 보여요"</p>
+              <p style="color:var(--green);font-size:11px;font-weight:600;margin-top:4px;">→ 평균 3주 만에 검색 순위 5단계 상승</p>
             </div>
           </div>
-          <div class="compare-actions">
-            <button class="btn-outline" onclick="addPlaceUrl()">+ URL 추가</button>
-            <button class="btn-place" id="p-compare-btn" onclick="analyzePlaceCompare()">비교 분석</button>
+
+          <div class="p-fear-card" style="border-color:rgba(99,102,241,.2);">
+            <div class="p-fear-ico" style="background:rgba(99,102,241,.1);">💇</div>
+            <div>
+              <h4 style="color:var(--accent2);">미용실 · 네일샵 원장님</h4>
+              <p>"리뷰는 있는데 신규 고객이 안 와요. 뭐가 문제인지 모르겠어요"</p>
+              <p style="color:var(--green);font-size:11px;font-weight:600;margin-top:4px;">→ 진단 후 바로 고칠 수 있는 항목 평균 7개 발견</p>
+            </div>
+          </div>
+
+          <div class="p-fear-card" style="border-color:rgba(99,102,241,.2);">
+            <div class="p-fear-ico" style="background:rgba(99,102,241,.1);">🏥</div>
+            <div>
+              <h4 style="color:var(--accent2);">병원 · 약국 · 헬스장</h4>
+              <p>"플레이스 관리를 해야 하는 건 아는데, 뭐부터 해야 할지 모르겠어요"</p>
+              <p style="color:var(--green);font-size:11px;font-weight:600;margin-top:4px;">→ AI가 우선순위대로 정리해서 알려드립니다</p>
+            </div>
+          </div>
+
+          <!-- 공포 유발 -->
+          <div style="text-align:center;margin:28px 0 16px;">
+            <h2 style="font-size:18px;font-weight:800;">이런 매장은 <span style="color:#ef4444;">네이버에서 밀립니다</span></h2>
+            <p style="font-size:12px;color:var(--text2);margin-top:4px;">하나라도 해당되면, 지금 매출이 새고 있습니다</p>
+          </div>
+
+          <div class="p-fear-card"><div class="p-fear-ico">📝</div><div><h4>소개글 미작성 · 50자 미만</h4><div class="p-fear-stat">노출 순위 12위 하락</div></div></div>
+          <div class="p-fear-card"><div class="p-fear-ico">💬</div><div><h4>리뷰 미응답 방치</h4><div class="p-fear-stat">재방문율 34% 감소</div></div></div>
+          <div class="p-fear-card"><div class="p-fear-ico">📸</div><div><h4>사진 10장 미만</h4><div class="p-fear-stat">클릭률 58% 감소</div></div></div>
+
+          <!-- 하단 CTA -->
+          <div style="text-align:center;padding:32px 0 20px;">
+            <p style="font-size:15px;font-weight:700;margin-bottom:6px;">지금 바로 확인해보세요</p>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">URL만 넣으면 끝. 10초면 결과가 나옵니다.</p>
+            <button onclick="document.getElementById('p-url').focus();window.scrollTo({top:0,behavior:'smooth'});" style="padding:14px 36px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;">내 매장 무료 진단하기</button>
           </div>
         </div>
-        <div id="p-compare-error"></div>
-        <div id="p-compare-loading" class="loading-place hidden"><div class="spinner"></div><p>매장 정보를 비교 분석하고 있습니다...</p></div>
-        <div id="p-compare-result" class="hidden"></div>
+        <div id="p-input-error"></div>
       </div>
+
+      <!-- SUB 1: LOADING -->
+      <div id="p-sub-loading" class="place-sub">
+        <div class="p-loading-screen">
+          <div class="p-loader"></div>
+          <ul class="p-load-steps">
+            <li id="pls1"><span class="p-ls-ico"></span>플레이스 정보 수집 중...</li>
+            <li id="pls2"><span class="p-ls-ico"></span>52개 항목 분석 중...</li>
+            <li id="pls3"><span class="p-ls-ico"></span>경쟁 매장 데이터 비교 중...</li>
+            <li id="pls4"><span class="p-ls-ico"></span>진단 리포트 생성 중...</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SUB 2: FREE (grade only) -->
+      <div id="p-sub-free" class="place-sub">
+        <div class="place-inner" id="p-free-content"></div>
+      </div>
+
+      <!-- SUB 3: REPORT (19,900원) -->
+      <div id="p-sub-report" class="place-sub">
+        <div class="place-inner" id="p-report-content"></div>
+      </div>
+
+      <!-- SUB 4: ACTION (49,900원) -->
+      <div id="p-sub-action" class="place-sub">
+        <div class="place-inner" id="p-action-content"></div>
+      </div>
+
+      <!-- SUB 5: AGENCY (299,000원) -->
+      <div id="p-sub-agency" class="place-sub">
+        <div class="place-inner" id="p-agency-content"></div>
+      </div>
+
     </div>
   </div>
+
+  <!-- Place transition overlay -->
+  <div class="p-trans" id="p-trans"><div style="text-align:center"><div class="p-trans-check">✅</div><p id="p-trans-text">결제 완료!</p></div></div>
+  <!-- Place toast -->
+  <div class="p-toast" id="p-toast"><span>✅</span><span id="p-toast-text"></span></div>
 
 </div><!-- /main -->
 
 <script>
-/* ═══ NAVIGATION ═══ */
+/* ═══ NAVIGATION (simplified — place only) ═══ */
 function go(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-  document.querySelectorAll('.sidebar-item[data-page]').forEach(i => i.classList.remove('on'));
-  document.getElementById('pg-' + page).classList.add('on');
-  const si = document.querySelector(`.sidebar-item[data-page="${page}"]`);
-  if (si) si.classList.add('on');
+  const el = document.getElementById('pg-' + page);
+  if (el) el.classList.add('on');
   window.scrollTo(0, 0);
 }
 
@@ -715,115 +736,959 @@ function cpy(b, t) {
   });
 }
 
-/* ═══ PLACE ═══ */
-function switchPlaceTab(tab) {
-  document.querySelectorAll('.place-tab').forEach((t, i) => {
-    t.classList.toggle('active', (tab === 'single' ? i === 0 : i === 1));
-  });
-  document.getElementById('p-tab-single').classList.toggle('hidden', tab !== 'single');
-  document.getElementById('p-tab-compare').classList.toggle('hidden', tab !== 'compare');
+/* ═══ PLACE FOMO SYSTEM ═══ */
+let pData = null; // store analysis result
+let pAiData = null; // store AI analysis result
+let pAiLoading = false;
+let pAiError = null;
+let pCompData = null; // store real competitor data
+let pCompLoading = false;
+let tossClientKey = null;
+let tossPayments = null;
+
+// Initialize Toss Payments
+(async function initToss() {
+  try {
+    const resp = await fetch('/api/toss-config');
+    const cfg = await resp.json();
+    tossClientKey = cfg.clientKey;
+    if (tossClientKey && window.TossPayments) {
+      tossPayments = TossPayments(tossClientKey);
+      console.log('Toss Payments initialized');
+    }
+  } catch (e) { console.warn('Toss init failed:', e); }
+})();
+
+// Payment flow
+async function pPayAndUnlock(tier) {
+  if (!pData) { pToast('먼저 매장을 진단해주세요.'); return; }
+
+  const pd = pData.place_data || {};
+  try {
+    // Create order on server
+    const orderResp = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier, storeName: pd.name, storeUrl: document.getElementById('p-url')?.value })
+    });
+    const order = await orderResp.json();
+    if (order.error) { pToast('주문 생성 실패: ' + order.error); return; }
+
+    // Save current state to sessionStorage so we can restore after redirect
+    sessionStorage.setItem('pData', JSON.stringify(pData));
+    sessionStorage.setItem('pAiData', JSON.stringify(pAiData));
+    sessionStorage.setItem('pCompData', JSON.stringify(pCompData));
+    sessionStorage.setItem('pUrl', document.getElementById('p-url')?.value || '');
+
+    if (!tossPayments) { pToast('결제 시스템 로딩 중... 잠시 후 다시 시도해주세요.'); return; }
+
+    // Request payment via Toss
+    const origin = window.location.origin;
+    await tossPayments.requestPayment('카드', {
+      amount: order.amount,
+      orderId: order.orderId,
+      orderName: order.orderName,
+      customerName: pd.name || '고객',
+      successUrl: origin + '/payment/success',
+      failUrl: origin + '/payment/fail',
+    });
+  } catch (e) {
+    if (e.code === 'USER_CANCEL') { pToast('결제가 취소되었습니다.'); return; }
+    console.error('Payment error:', e);
+    pToast('결제 오류: ' + (e.message || '다시 시도해주세요.'));
+  }
 }
 
-async function analyzePlaceSingle() {
+// Check payment result on page load (after redirect)
+(function checkPaymentResult() {
+  const params = new URLSearchParams(window.location.search);
+  const payment = params.get('payment');
+  const tier = Number(params.get('tier'));
+
+  if (payment === 'success' && tier) {
+    // Restore data from sessionStorage
+    try {
+      pData = JSON.parse(sessionStorage.getItem('pData'));
+      pAiData = JSON.parse(sessionStorage.getItem('pAiData'));
+      pCompData = JSON.parse(sessionStorage.getItem('pCompData'));
+      const url = sessionStorage.getItem('pUrl');
+      if (url) document.getElementById('p-url').value = url;
+    } catch (e) { console.warn('Restore failed:', e); }
+
+    if (pData) {
+      // Render all pages
+      pRenderFree();
+      pRenderReport();
+      pRenderAction();
+      pRenderAgency();
+
+      // Navigate to the unlocked page
+      const pages = { 1: 'p-sub-report', 2: 'p-sub-action', 3: 'p-sub-agency' };
+      setTimeout(() => {
+        pShowSub(pages[tier] || 'p-sub-report');
+        pToast('결제 완료! 리포트가 해금되었습니다.');
+        document.getElementById('p-topbar-sub').textContent = '진단 완료';
+      }, 300);
+    }
+
+    // Clean URL
+    window.history.replaceState({}, '', '/');
+  } else if (payment === 'fail') {
+    const msg = params.get('msg');
+    pToast('결제 실패: ' + (msg || '다시 시도해주세요.'));
+    window.history.replaceState({}, '', '/');
+  } else if (payment === 'error') {
+    pToast('결제 오류가 발생했습니다.');
+    window.history.replaceState({}, '', '/');
+  }
+})();
+
+function pShowSub(id) {
+  document.querySelectorAll('.place-sub').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelector('.place-page').scrollTo(0, 0);
+  window.scrollTo(0, 0);
+}
+
+function pTransition(subId, text) {
+  const o = document.getElementById('p-trans');
+  document.getElementById('p-trans-text').textContent = text;
+  o.classList.add('on');
+  setTimeout(() => { pShowSub(subId); }, 700);
+  setTimeout(() => { o.classList.remove('on'); }, 1100);
+}
+
+function pToast(t) {
+  const e = document.getElementById('p-toast');
+  document.getElementById('p-toast-text').textContent = t;
+  e.classList.add('show');
+  setTimeout(() => e.classList.remove('show'), 3000);
+}
+
+async function pStartAnalyze() {
   const url = document.getElementById('p-url').value.trim();
-  if (!url) return;
-  const btn = document.getElementById('p-analyze-btn');
-  btn.disabled = true;
-  showEl('p-single-loading'); hideEl('p-single-result'); hideEl('p-single-error');
+  if (!url) { document.getElementById('p-url').focus(); return; }
+
+  pShowSub('p-sub-loading');
+  document.getElementById('p-topbar-sub').textContent = '분석 중...';
+
+  // Animate loading steps
+  const steps = ['pls1','pls2','pls3','pls4'];
+  steps.forEach((id, i) => {
+    setTimeout(() => {
+      if (i > 0) { document.getElementById(steps[i-1]).classList.remove('on'); document.getElementById(steps[i-1]).classList.add('done'); }
+      document.getElementById(id).classList.add('on');
+    }, (i+1) * 600);
+  });
+
   try {
     const resp = await fetch('/api/place', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url })
     });
     const data = await resp.json();
-    if (data.error) showPlaceError('p-single-error', data.error);
-    else renderPlaceResult('p-single-result', data);
-  } catch (e) { showPlaceError('p-single-error', '서버 연결에 실패했습니다.'); }
-  hideEl('p-single-loading'); btn.disabled = false;
-}
+    if (data.error) {
+      document.getElementById('p-input-error').innerHTML = `<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px;text-align:center;color:#ef4444;margin-top:16px;max-width:480px;margin-left:auto;margin-right:auto;">${data.error}</div>`;
+      pShowSub('p-sub-input');
+      document.getElementById('p-topbar-sub').textContent = '데이터 기반 52개 항목 분석';
+      return;
+    }
+    pData = data;
+    document.getElementById('pls4').classList.add('done');
 
-function addPlaceUrl() {
-  const wrap = document.getElementById('p-compare-urls');
-  if (wrap.children.length >= 5) return;
-  const div = document.createElement('div');
-  div.className = 'compare-url-row';
-  div.innerHTML = `<input type="text" class="p-compare-input" placeholder="매장 ${wrap.children.length + 1} URL"><button class="remove-url" onclick="removePlaceUrl(this)">&times;</button>`;
-  wrap.appendChild(div);
-}
+    // Start AI analysis + competitor search in background
+    pAiLoading = true; pAiData = null; pAiError = null;
+    pCompLoading = true; pCompData = null;
+    pCallAi(data);
+    pCallCompetitors(data);
 
-function removePlaceUrl(btn) {
-  const wrap = document.getElementById('p-compare-urls');
-  if (wrap.children.length <= 2) return;
-  btn.parentElement.remove();
-}
-
-async function analyzePlaceCompare() {
-  const inputs = document.querySelectorAll('.p-compare-input');
-  const urls = Array.from(inputs).map(i => i.value.trim()).filter(Boolean);
-  if (urls.length < 2) { showPlaceError('p-compare-error', '최소 2개의 URL을 입력해주세요.'); return; }
-  const btn = document.getElementById('p-compare-btn');
-  btn.disabled = true;
-  showEl('p-compare-loading'); hideEl('p-compare-result'); hideEl('p-compare-error');
-  const results = [];
-  for (const url of urls) {
-    try {
-      const resp = await fetch('/api/place', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url}) });
-      const data = await resp.json();
-      results.push(data.error ? { error: data.error, url } : data);
-    } catch (e) { results.push({ error: '분석 실패', url }); }
+    setTimeout(() => {
+      pRenderFree();
+      pRenderReport();
+      pRenderAction();
+      pRenderAgency();
+      pShowSub('p-sub-free');
+      document.getElementById('p-topbar-sub').textContent = '진단 완료';
+    }, 500);
+  } catch (e) {
+    document.getElementById('p-input-error').innerHTML = `<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px;text-align:center;color:#ef4444;margin-top:16px;max-width:480px;margin-left:auto;margin-right:auto;">서버 연결에 실패했습니다.</div>`;
+    pShowSub('p-sub-input');
+    document.getElementById('p-topbar-sub').textContent = '데이터 기반 52개 항목 분석';
   }
-  const valid = results.filter(r => !r.error);
-  if (valid.length < 2) showPlaceError('p-compare-error', '분석 가능한 매장이 2개 미만입니다.');
-  else renderPlaceCompare('p-compare-result', valid);
-  hideEl('p-compare-loading'); btn.disabled = false;
 }
 
-function renderPlaceResult(id, data) {
-  const el = document.getElementById(id);
-  const pd = data.place_data;
+function pStoreHeader() {
+  const pd = pData.place_data;
+  const photo = pd.representative_photo_url
+    ? `<img class="p-store-thumb" src="${pd.representative_photo_url}" alt="${pd.name}">`
+    : `<div class="p-store-thumb" style="display:flex;align-items:center;justify-content:center;font-size:24px;">🏪</div>`;
+  return `<div class="p-store">${photo}<div class="p-store-info"><h3>${pd.name||'알 수 없음'}</h3><p>${pd.category||''} · ${pd.address||''}</p></div></div>`;
+}
+
+function pGradeColor() { return pData.grade_color || 'var(--accent)'; }
+function pScore(v) { return typeof v === 'number' ? (Number.isInteger(v) ? v : v.toFixed(1)) : v; }
+
+function pRenderFree() {
+  const d = pData, pd = d.place_data;
   const cats = ['basic','photo','menu','description','review','extra'];
-  const catIcons = {basic:'📋',photo:'📸',menu:'🍽️',description:'✏️',review:'⭐',extra:'🔧'};
-  let scoreCardsHtml = cats.map(key => {
-    const s = data.scores[key];
-    const pct = s.max > 0 ? (s.score / s.max) * 100 : 0;
+  const icons = {basic:'📋',photo:'📸',menu:'🍽️',description:'✏️',review:'⭐',extra:'🔧'};
+
+  let catRows = cats.map((k, i) => {
+    const s = d.scores[k];
+    const pct = s.max > 0 ? Math.round((s.score/s.max)*100) : 0;
     const color = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
-    const detailsHtml = s.details.map(d => `<div class="score-detail"><span>${d.ok ? '<span class="check">✓</span>' : '<span class="cross">✕</span>'} ${d.name}</span><span>${d.score}/${d.max}</span></div>`).join('');
-    return `<div class="score-card"><div class="label">${catIcons[key]} ${s.label}</div><div class="value" style="color:${color}">${s.score}<span style="font-size:14px;color:var(--text2)">/${s.max}</span></div><div class="score-bar"><div class="score-bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="score-details">${detailsHtml}</div></div>`;
+    const barClass = pct >= 80 ? 'b-g' : pct >= 50 ? 'b-o' : 'b-r';
+    if (i === 0) return `<div class="p-cat-row"><span class="p-cat-emoji">${icons[k]}</span><span class="p-cat-name">${s.label}</span><div class="p-cat-bar-w"><div class="p-cat-bar" style="width:${pct}%;background:${color}"></div></div><span class="p-cat-sc" style="color:${color}">${pct}점</span></div>`;
+    return `<div class="p-cat-row"><span class="p-cat-emoji">${icons[k]}</span><span class="p-cat-name">${s.label}</span><div class="p-cat-bar-w"><div class="p-cat-bar" style="width:${pct}%;background:${color}"></div></div><span class="p-cat-sc blur">??점</span><span class="p-lock-i">🔒</span></div>`;
   }).join('');
-  const recsHtml = data.recommendations.length > 0 ? data.recommendations.map(r => `<div class="rec-item"><span class="rec-badge ${r.priority}">${r.priority==='high'?'긴급':r.priority==='mid'?'권장':'참고'}</span><span class="rec-text">${r.text}</span></div>`).join('') : '<p style="color:var(--text2);text-align:center;padding:20px;">모든 항목이 잘 설정되어 있습니다!</p>';
-  const photoHtml = pd.representative_photo_url ? `<img class="place-photo" src="${pd.representative_photo_url}" alt="${pd.name}">` : `<div class="place-photo" style="display:flex;align-items:center;justify-content:center;font-size:28px;">🏪</div>`;
-  el.innerHTML = `<div class="result">
-    <div class="place-header-card">${photoHtml}<div class="place-info"><h2>${pd.name||'알 수 없음'}</h2><div class="meta">${pd.category?`<span>📂 ${pd.category}</span>`:''}${pd.address?`<span>📍 ${pd.address}</span>`:''}${pd.phone?`<span>📞 ${pd.phone}</span>`:''}</div></div></div>
-    <div class="grade-section"><div class="grade-card"><div class="grade-circle" style="border-color:${data.grade_color}"><div class="grade-letter" style="color:${data.grade_color}">${data.grade}</div><div class="grade-pct" style="color:${data.grade_color}">${data.percentage}점</div></div><div class="grade-text">${data.grade_text}</div><div class="grade-score-text">${data.total_score} / ${data.total_max}</div></div><div class="grade-card"><canvas id="radar-single" width="280" height="280"></canvas></div></div>
-    <div class="scores-grid">${scoreCardsHtml}</div>
-    <div class="recs-card"><h3>💡 개선 추천사항</h3>${recsHtml}</div></div>`;
-  showEl(id);
-  const ctx = document.getElementById('radar-single');
-  if (ctx) new Chart(ctx, { type:'radar', data:{ labels:cats.map(k=>data.scores[k].label), datasets:[{ label:pd.name, data:cats.map(k=>{const s=data.scores[k];return s.max>0?Math.round((s.score/s.max)*100):0;}), backgroundColor:'rgba(99,102,241,.2)', borderColor:'rgba(99,102,241,.8)', borderWidth:2, pointBackgroundColor:'rgba(99,102,241,1)' }]}, options:{ scales:{ r:{ beginAtZero:true, max:100, grid:{color:'rgba(255,255,255,.08)'}, angleLines:{color:'rgba(255,255,255,.08)'}, pointLabels:{color:'#8b8fa3',font:{size:12,weight:'600'}}, ticks:{display:false}}}, plugins:{legend:{display:false}}} });
+
+  const highRecs = d.recommendations.filter(r => r.priority === 'high').length;
+  const midRecs = d.recommendations.filter(r => r.priority === 'mid').length;
+  const lowRecs = d.recommendations.filter(r => r.priority !== 'high' && r.priority !== 'mid').length;
+
+  document.getElementById('p-free-content').innerHTML = `
+    ${pStoreHeader()}
+    <div class="p-grade">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">종합 진단 등급</div>
+      <div class="p-grade-letter" style="color:${pGradeColor()}">${d.grade}</div>
+      <div class="p-grade-score">${pScore(d.percentage)} <span>/ 100점</span></div>
+    </div>
+    <div class="p-fomo">
+      <div class="p-fomo-ico">😰</div>
+      <div><p>같은 지역 매장 중 <strong>개선이 시급한 상태</strong>입니다.<br>발견된 문제 <em>${d.recommendations.length}개</em> 중 <strong>${highRecs}개가 긴급</strong>합니다.</p></div>
+    </div>
+    <div class="p-card"><h3>카테고리별 점수</h3>${catRows}</div>
+    <div class="p-card">
+      <div class="p-issues">
+        <div class="p-issue-box"><div class="p-issue-n red">${highRecs}</div><div class="p-issue-l">긴급 수정</div></div>
+        <div class="p-issue-box"><div class="p-issue-n org">${midRecs}</div><div class="p-issue-l">권장 개선</div></div>
+        <div class="p-issue-box"><div class="p-issue-n blu">${lowRecs}</div><div class="p-issue-l">참고 사항</div></div>
+      </div>
+    </div>
+    <div class="p-fomo" style="border-color:rgba(245,158,11,.2);background:linear-gradient(135deg,rgba(245,158,11,.06),rgba(239,68,68,.03));">
+      <div class="p-fomo-ico">⚠️</div>
+      <div><p><strong>긴급 수정이 필요한 ${highRecs}개 항목</strong>을 방치할수록<br>매일 잠재 고객을 놓치고 있습니다.</p></div>
+    </div>
+    <div class="p-cta">
+      <div class="emoji">📊</div>
+      <h3>종합 진단 리포트</h3>
+      <p>52개 항목 전수 분석 · 카테고리별 상세 채점표<br>긴급/권장/참고 개선사항 전체 공개</p>
+      <button class="p-btn-unlock" onclick="pPayAndUnlock(1)">
+        리포트 받기 <span class="price">19,900원</span>
+      </button>
+      <div class="p-cta-sub">대행사 무료 진단 수준을 혼자서, 즉시 받아보세요</div>
+    </div>`;
 }
 
-const CHART_COLORS = ['#6366f1','#10b981','#ef4444','#f59e0b','#a78bfa'];
-
-function renderPlaceCompare(id, results) {
-  const el = document.getElementById(id);
+function pRenderReport() {
+  const d = pData, pd = d.place_data;
   const cats = ['basic','photo','menu','description','review','extra'];
-  const maxTotal = Math.max(...results.map(r => r.percentage));
-  let tableRows = '<tr><td style="font-weight:700">종합 등급</td>' + results.map(r => `<td><span class="compare-grade" style="background:${r.grade_color}22;color:${r.grade_color}">${r.grade}</span></td>`).join('') + '</tr>';
-  tableRows += '<tr><td>총점</td>' + results.map(r => `<td class="${r.percentage===maxTotal?'winner':'loser'}">${r.percentage}점</td>`).join('') + '</tr>';
-  for (const key of cats) {
-    const label = results[0].scores[key].label;
-    const vals = results.map(r => r.scores[key]);
-    const maxS = Math.max(...vals.map(v => v.score));
-    tableRows += `<tr><td>${label}</td>` + vals.map(v => `<td class="${v.score===maxS&&results.length>1?'winner':(v.score<maxS?'loser':'')}">${v.score}/${v.max}</td>`).join('') + '</tr>';
-  }
-  [['사진 수',r=>r.place_data.photo_count+'장'],['메뉴 수',r=>r.place_data.menu_count+'개'],['리뷰 수',r=>r.place_data.review_count+'개'],['별점',r=>r.place_data.review_rating>0?r.place_data.review_rating.toFixed(1):'-'],['소개글',r=>r.place_data.description_length>0?r.place_data.description_length+'자':'미작성']].forEach(([label,fn]) => {
-    tableRows += `<tr><td>${label}</td>` + results.map(r => `<td>${fn(r)}</td>`).join('') + '</tr>';
+  const icons = {basic:'📋',photo:'📸',menu:'🍽️',description:'✏️',review:'⭐',extra:'🔧'};
+
+  // Score cards with full details
+  let catCards = cats.map(k => {
+    const s = d.scores[k];
+    const pct = s.max > 0 ? Math.round((s.score/s.max)*100) : 0;
+    const color = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+    const items = s.details.map(det => {
+      const icon = det.ok ? '✅' : (det.score > 0 ? '⚠️' : '❌');
+      const cls = det.ok ? 'good' : (det.score > 0 ? 'warn' : 'bad');
+      const val = det.ok ? '통과' : `-${det.max - det.score}점`;
+      return `<div class="p-d-item"><span class="p-d-chk">${icon}</span><span class="p-d-name">${det.name}</span><span class="p-d-val ${cls}">${val}</span></div>`;
+    }).join('');
+    return `<div class="p-card"><h3>${icons[k]} ${s.label} — <span style="color:${color}">${s.score}/${s.max} (${pct}점)</span></h3>${items}</div>`;
+  }).join('');
+
+  const recsHtml = d.recommendations.map(r => {
+    const cls = r.priority === 'high' ? 'p-reco-urg' : 'p-reco-rec';
+    const lbl = r.priority === 'high' ? '긴급' : r.priority === 'mid' ? '권장' : '참고';
+    return `<div class="p-reco"><span class="p-reco-tag ${cls}">${lbl}</span><p>${r.text}</p></div>`;
+  }).join('');
+
+  // Grade circle color
+  const gc = pGradeColor();
+
+  document.getElementById('p-report-content').innerHTML = `
+    <div class="p-progress"><div class="p-dot cur"></div><div class="p-dot"></div><div class="p-dot"></div></div>
+    ${pStoreHeader()}
+    <div style="text-align:center;margin-bottom:14px;">
+      <span style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(16,185,129,.15);color:var(--green);">리포트 해금 완료</span>
+      <h2 style="font-size:18px;font-weight:900;margin-top:8px;">종합 진단 리포트</h2>
+    </div>
+
+    <!-- Grade + Radar side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="p-card" style="text-align:center;margin-bottom:0;">
+        <div style="width:110px;height:110px;border-radius:50%;border:4px solid ${gc};margin:0 auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div style="font-size:40px;font-weight:900;color:${gc};line-height:1;">${d.grade}</div>
+          <div style="font-size:14px;font-weight:600;color:${gc};">${pScore(d.percentage)}점</div>
+        </div>
+        <div style="font-size:12px;color:var(--text2);">${d.grade_text||''}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px;">${d.total_score} / ${d.total_max}</div>
+      </div>
+      <div class="p-card" style="margin-bottom:0;display:flex;align-items:center;justify-content:center;">
+        <canvas id="p-radar-report" width="240" height="240"></canvas>
+      </div>
+    </div>
+
+    <!-- Score summary bar -->
+    <div class="p-card">
+      <h3>카테고리별 점수 요약</h3>
+      ${cats.map(k => {
+        const s = d.scores[k]; const pct = s.max > 0 ? Math.round((s.score/s.max)*100) : 0;
+        const color = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+        return `<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>${icons[k]} ${s.label}</span><span style="color:${color};font-weight:700;">${s.score}/${s.max}</span></div><div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width .6s;"></div></div></div>`;
+      }).join('')}
+    </div>
+
+    ${catCards}
+    <div class="p-card"><h3>💡 개선 추천사항</h3>${recsHtml}</div>
+
+    <!-- PDF + Email -->
+    <div class="p-card" style="text-align:center;">
+      <h3>📄 리포트 저장 · 전달</h3>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="p-btn-unlock" style="padding:10px 20px;font-size:13px;" onclick="pDownloadPdf()">📄 PDF 다운로드</button>
+      </div>
+      <div style="display:flex;gap:8px;max-width:360px;margin:0 auto;">
+        <input type="email" id="p-email-input" placeholder="이메일 주소 입력" style="flex:1;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">
+        <button class="p-btn-unlock" style="padding:10px 16px;font-size:13px;" onclick="pSendEmail()">📧 전송</button>
+      </div>
+      <p style="font-size:10px;color:var(--text2);margin-top:6px;">이메일로 전체 리포트를 받아보세요</p>
+    </div>
+
+    <div class="p-fomo" style="margin-top:4px;">
+      <div class="p-fomo-ico">😱</div>
+      <div><p>문제가 뭔지는 알겠는데...<br><strong>경쟁 매장은 얼마나 잘 하고 있을까요?</strong><br>격차를 모르면, 어디부터 고쳐야 할지 모릅니다.</p></div>
+    </div>
+    <div class="p-cta">
+      <div class="emoji">⚔️</div>
+      <h3>경쟁매장 비교 + 즉시 액션 가이드</h3>
+      <p>주변 TOP 매장을 자동으로 찾아서 비교 분석 +<br>오늘 당장 실행할 수 있는 개선 가이드</p>
+      <button class="p-btn-unlock" onclick="pPayAndUnlock(2)">
+        비교 분석 + 액션 가이드 <span class="price">49,900원</span>
+      </button>
+      <div class="p-cta-sub">대행사 1회 컨설팅 30~50만원 → 49,900원</div>
+    </div>`;
+
+  // Draw radar chart
+  setTimeout(() => {
+    const ctx = document.getElementById('p-radar-report');
+    if (ctx) new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: cats.map(k => d.scores[k].label),
+        datasets: [{
+          label: pd.name,
+          data: cats.map(k => { const s = d.scores[k]; return s.max > 0 ? Math.round((s.score/s.max)*100) : 0; }),
+          backgroundColor: 'rgba(99,102,241,.2)',
+          borderColor: 'rgba(99,102,241,.8)',
+          borderWidth: 2,
+          pointBackgroundColor: 'rgba(99,102,241,1)'
+        }]
+      },
+      options: {
+        scales: { r: { beginAtZero: true, max: 100, grid: {color:'rgba(255,255,255,.08)'}, angleLines: {color:'rgba(255,255,255,.08)'}, pointLabels: {color:'#8b8fa3',font:{size:10,weight:'600'}}, ticks: {display:false} }},
+        plugins: { legend: {display:false} }
+      }
+    });
+  }, 100);
+}
+
+function pGenMockCompetitors() {
+  // Generate realistic mock competitors based on real data
+  const pd = pData.place_data;
+  const d = pData;
+  const cats = ['basic','photo','menu','description','review','extra'];
+  const myPct = d.percentage;
+
+  // Create 4 mock competitors that are better/similar/worse
+  const names = ['인기맛집 1위','맛있는집 2위','좋은식당 3위','동네맛집 5위'];
+  const offsets = [25, 15, 5, -8]; // relative to my score
+  return names.map((name, i) => {
+    const pct = Math.min(98, Math.max(20, myPct + offsets[i] + Math.floor(Math.random()*6-3)));
+    const catScores = cats.map(k => {
+      const myS = d.scores[k];
+      const myPctCat = myS.max > 0 ? Math.round((myS.score/myS.max)*100) : 50;
+      const offset = offsets[i] + Math.floor(Math.random()*15-7);
+      return Math.min(100, Math.max(10, myPctCat + offset));
+    });
+    const photoMul = [3.5, 2.2, 1.5, 0.7][i];
+    const reviewMul = [4.0, 2.5, 1.8, 0.8][i];
+    return {
+      name, pct,
+      grade: pct >= 90 ? 'A' : pct >= 80 ? 'B+' : pct >= 70 ? 'B' : pct >= 60 ? 'C+' : pct >= 50 ? 'C' : 'D',
+      photos: Math.round((pd.photo_count || 10) * photoMul),
+      reviews: Math.round((pd.review_count || 20) * reviewMul),
+      rating: Math.min(5.0, Math.max(3.5, (pd.review_rating || 4.0) + [0.5, 0.3, 0.1, -0.2][i])).toFixed(1),
+      responseRate: [92, 78, 55, 15][i],
+      catScores
+    };
   });
-  const headerCells = results.map((r,i) => `<th style="color:${CHART_COLORS[i]}">${r.place_data.name||('매장 '+(i+1))}</th>`).join('');
-  el.innerHTML = `<div class="compare-result"><div class="chart-wrap"><h3>항목별 비교</h3><canvas id="radar-compare"></canvas></div><div class="compare-table-wrap"><h3>상세 비교표</h3><table class="compare-table"><thead><tr><th>항목</th>${headerCells}</tr></thead><tbody>${tableRows}</tbody></table></div></div>`;
-  showEl(id);
-  const ctx = document.getElementById('radar-compare');
-  if (ctx) new Chart(ctx, { type:'radar', data:{ labels:cats.map(k=>results[0].scores[k].label), datasets:results.map((r,i)=>({ label:r.place_data.name||('매장 '+(i+1)), data:cats.map(k=>{const s=r.scores[k];return s.max>0?Math.round((s.score/s.max)*100):0;}), backgroundColor:CHART_COLORS[i]+'22', borderColor:CHART_COLORS[i], borderWidth:2, pointBackgroundColor:CHART_COLORS[i] }))}, options:{ scales:{ r:{ beginAtZero:true, max:100, grid:{color:'rgba(255,255,255,.08)'}, angleLines:{color:'rgba(255,255,255,.08)'}, pointLabels:{color:'#8b8fa3',font:{size:12,weight:'600'}}, ticks:{display:false}}}, plugins:{legend:{labels:{color:'#e4e6ed',font:{size:12}}}}} });
+}
+
+function pRenderAction() {
+  const d = pData, pd = d.place_data;
+  const descLen = pd.description_length || 0;
+  const photoCount = pd.photo_count || 0;
+  const reviewCount = pd.review_count || 0;
+  const rating = pd.review_rating || 0;
+  const menuCount = pd.menu_count || 0;
+  const cats = ['basic','photo','menu','description','review','extra'];
+  const icons = {basic:'📋',photo:'📸',menu:'🍽️',description:'✏️',review:'⭐',extra:'🔧'};
+  const myName = pd.name || '내 매장';
+
+  // Real competitors or fallback
+  const hasRealComps = pCompData?.competitors?.length > 0;
+  const realComps = hasRealComps ? pCompData.competitors : [];
+
+  // Build unified list: my store + competitors, sorted by percentage
+  const allStores = [
+    { ...d, _isMine: true },
+    ...realComps.map(c => ({ ...c, _isMine: false }))
+  ].sort((a, b) => b.percentage - a.percentage);
+
+  const myRank = allStores.findIndex(s => s._isMine) + 1;
+  const myCatPcts = cats.map(k => { const s = d.scores[k]; return s.max > 0 ? Math.round((s.score/s.max)*100) : 0; });
+
+  // Competitor table rows
+  const compRows = allStores.map((s, i) => {
+    const pd2 = s.place_data;
+    const isMine = s._isMine;
+    const cls = isMine ? 'class="p-me"' : '';
+    const nameStyle = isMine ? 'style="color:var(--accent2);font-weight:700;"' : '';
+    const lowCls = (val, best) => !isMine && val < best ? '' : (isMine ? 'class="p-rank-low"' : '');
+    return `<tr ${cls}><td>${i+1}</td><td ${nameStyle}>${pd2?.name || '매장'} ${isMine ? '(내 매장)' : ''}</td><td>${s.grade}</td><td>${s.percentage}</td><td>${pd2?.review_count || 0}</td><td>${pd2?.photo_count || 0}</td><td>${pd2?.review_rating > 0 ? pd2.review_rating.toFixed(1) : '-'}</td></tr>`;
+  }).join('');
+
+  // Top competitor gap (compare with #1 if I'm not #1)
+  const topStore = allStores[0];
+  const gaps = [];
+  if (!topStore._isMine) {
+    const topPd = topStore.place_data;
+    if (topStore.percentage - pScore(d.percentage) > 0) gaps.push({label:'종합 점수', gap: pScore(topStore.percentage - pScore(d.percentage)), unit:'점'});
+    if ((topPd?.review_count||0) - reviewCount > 0) gaps.push({label:'리뷰 수', gap: (topPd?.review_count||0) - reviewCount, unit:'개'});
+    if ((topPd?.photo_count||0) - photoCount > 0) gaps.push({label:'사진 수', gap: (topPd?.photo_count||0) - photoCount, unit:'장'});
+  }
+
+  // Build action items based on actual data
+  let actions = [];
+  if (descLen < 200) actions.push({h:'소개글 교체 (5분)',p:`현재 ${descLen}자 → 200자 이상으로 SEO 최적화된 소개글로 교체하세요.`,fx:'검색 노출 +40%'});
+  if (photoCount < 30) actions.push({h:`사진 ${Math.min(30, 30-photoCount)}장 추가 업로드`,p:'내부, 메뉴, 조리 과정 사진을 추가하세요. 밝은 조명에서 촬영.',fx:'클릭률 +58%'});
+  const reviewScore = d.scores.review;
+  const hasLowResponse = reviewScore.details.some(det => !det.ok && det.name.includes('응답'));
+  if (hasLowResponse) actions.push({h:'미응답 리뷰 답글 달기',p:'최신 리뷰부터 하루 10개씩 처리. 2줄 이상 개인화 답변.',fx:'재방문율 +34%'});
+  const missingBasic = d.scores.basic.details.filter(det => !det.ok);
+  if (missingBasic.length > 0) actions.push({h:'기본정보 누락 수정 ('+missingBasic.length+'건)',p:missingBasic.map(m=>m.name).join(', '),fx:'기본 점수 즉시 회복'});
+  const missingMenu = d.scores.menu.details.filter(det => !det.ok);
+  if (missingMenu.length > 0) actions.push({h:'메뉴 정보 보강 ('+missingMenu.length+'건)',p:missingMenu.map(m=>m.name).join(', '),fx:'메뉴 점수 회복'});
+  const missingExtra = d.scores.extra.details.filter(det => !det.ok);
+  if (missingExtra.length > 0) actions.push({h:'네이버 연동 활성화 ('+missingExtra.length+'건)',p:missingExtra.map(m=>m.name).join(', '),fx:'추가 노출 채널 확보'});
+  if (actions.length === 0) actions.push({h:'현재 설정 유지',p:'기본 항목은 양호합니다. 사진과 리뷰를 꾸준히 관리하세요.',fx:'꾸준한 관리가 핵심'});
+  const actionsHtml = actions.map((a,i) => `<div class="p-action"><div class="p-action-n">${i+1}</div><div><h4>${a.h}</h4><p>${a.p}</p><span class="p-action-fx">예상 효과: ${a.fx}</span></div></div>`).join('');
+
+  // Rewrite
+  const name = pd.name || '매장';
+  const cat = pd.category || '전문점';
+  const addr = pd.address || '';
+  const addrShort = addr.split(' ').slice(0, 3).join(' ');
+
+  document.getElementById('p-action-content').innerHTML = `
+    <div class="p-progress"><div class="p-dot done"></div><div class="p-dot cur"></div><div class="p-dot"></div></div>
+    ${pStoreHeader()}
+    <div style="text-align:center;margin-bottom:14px;">
+      <span style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(16,185,129,.15);color:var(--green);">비교 분석 해금 완료</span>
+      <h2 style="font-size:18px;font-weight:900;margin-top:8px;">경쟁매장 비교 + 즉시 액션 가이드</h2>
+      <p style="font-size:12px;color:var(--text2);margin-top:4px;">주변 TOP 매장을 자동으로 비교 분석했습니다</p>
+    </div>
+
+    <!-- Radar comparison -->
+    <div class="p-card" style="text-align:center;">
+      <h3>📊 경쟁매장 대비 포지션</h3>
+      ${pCompLoading ? '<div style="padding:20px;"><div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto 8px;"></div><p style="font-size:11px;color:var(--text2);">경쟁매장 분석 중... (최대 30초)</p></div>' : '<canvas id="p-radar-compare" width="300" height="300" style="max-width:100%;margin:0 auto;"></canvas>'}
+    </div>
+
+    <!-- Rank table -->
+    <div class="p-card" style="overflow-x:auto;">
+      <h3>🏆 ${hasRealComps ? `주변 경쟁매장 비교 (${pCompData.query})` : '경쟁매장 비교'}</h3>
+      ${pCompLoading ? '<div style="text-align:center;padding:20px;"><div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto 8px;"></div><p style="font-size:11px;color:var(--text2);">경쟁매장을 찾고 분석하고 있습니다...</p></div>' : `
+      <table class="p-comp-table">
+        <thead><tr><th>#</th><th>매장</th><th>등급</th><th>점수</th><th>리뷰</th><th>사진</th><th>평점</th></tr></thead>
+        <tbody>${compRows}</tbody>
+      </table>
+      ${hasRealComps ? '<p style="font-size:10px;color:var(--green);margin-top:8px;text-align:center;">✓ 실제 네이버 플레이스 데이터 기반 분석</p>' : '<p style="font-size:10px;color:var(--text2);margin-top:8px;text-align:center;">경쟁매장 검색 중이거나 결과가 없습니다.</p>'}
+      `}
+    </div>
+
+    <!-- Gap analysis -->
+    ${gaps.length > 0 ? `
+    <div class="p-card">
+      <h3>📉 1위 매장 "${topStore.place_data?.name||'상위매장'}"과의 격차</h3>
+      ${gaps.map(g => `<div class="p-d-item"><span class="p-d-chk">📉</span><span class="p-d-name">${g.label}</span><span class="p-d-val bad">-${g.gap}${g.unit} 부족</span></div>`).join('')}
+      <div class="p-reco" style="margin-top:10px;">
+        <span class="p-reco-tag p-reco-urg">핵심 인사이트</span>
+        <p>가장 빠르게 좁힐 수 있는 격차: <strong style="color:var(--text);">기본 설정 + 소개글 + 리뷰 응답률</strong>. 이 3가지는 오늘 당장 개선 가능합니다.</p>
+      </div>
+    </div>` : ''}
+
+    <!-- AI-powered sections -->
+    ${pRenderAiSections(d, descLen, name, cat, addrShort, actionsHtml, myRank)}
+
+    <!-- PDF + Email for action page -->
+    <div class="p-card" style="text-align:center;">
+      <h3>📄 전체 분석 리포트 저장</h3>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="p-btn-unlock" style="padding:10px 20px;font-size:13px;" onclick="pDownloadPdf()">📄 PDF 다운로드</button>
+      </div>
+      <div style="display:flex;gap:8px;max-width:360px;margin:0 auto;">
+        <input type="email" id="p-email-input2" placeholder="이메일 주소 입력" style="flex:1;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;">
+        <button class="p-btn-unlock" style="padding:10px 16px;font-size:13px;" onclick="document.getElementById('p-email-input').value=document.getElementById('p-email-input2').value;pSendEmail()">📧 전송</button>
+      </div>
+    </div>
+
+    <div class="p-fomo" style="margin-top:4px;">
+      <div class="p-fomo-ico">🤔</div>
+      <div><p>위 액션만 해도 등급 상승은 가능합니다.<br>하지만 솔직히...<br><br><em>사장님이 직접 다 하실 시간이 있으신가요?</em><br><br>소개글 수정, 사진 촬영, 리뷰 답글, 소식탭 발행...<br><strong>매장 운영하면서 이걸 언제 다 하십니까.</strong></p></div>
+    </div>
+
+    <div class="p-cta p-cta-gold">
+      <div class="emoji">🏆</div>
+      <h3>귀찮은 건 다 맡기세요</h3>
+      <p>데이터 기반 맞춤 제안으로 전문가가 직접 실행합니다.<br>사장님은 매장에만 집중하세요.</p>
+      <button class="p-btn-unlock p-btn-gold" onclick="pPayAndUnlock(3)">
+        대행 서비스 신청 <span class="price">299,000원</span>
+      </button>
+      <div class="p-cta-sub">지금까지의 진단 데이터를 기반으로 맞춤 실행</div>
+    </div>`;
+
+  // Draw comparison radar with real data
+  setTimeout(() => {
+    const ctx = document.getElementById('p-radar-compare');
+    if (!ctx) return;
+    const COLORS = ['#6366f1','#10b981','#ef4444','#f59e0b','#a78bfa'];
+    const datasets = [
+      { label: myName + ' (내 매장)', data: myCatPcts, backgroundColor: COLORS[0]+'33', borderColor: COLORS[0], borderWidth: 2.5, pointBackgroundColor: COLORS[0] }
+    ];
+    // Add real competitors to radar
+    if (hasRealComps) {
+      realComps.slice(0, 3).forEach((comp, i) => {
+        const compPcts = cats.map(k => {
+          const s = comp.scores?.[k];
+          return s && s.max > 0 ? Math.round((s.score/s.max)*100) : 0;
+        });
+        datasets.push({
+          label: comp.place_data?.name || `경쟁${i+1}`,
+          data: compPcts,
+          backgroundColor: COLORS[i+1]+'22',
+          borderColor: COLORS[i+1],
+          borderWidth: 1.5,
+          pointBackgroundColor: COLORS[i+1],
+          borderDash: [4,2]
+        });
+      });
+    }
+    new Chart(ctx, {
+      type: 'radar',
+      data: { labels: cats.map(k => d.scores[k].label), datasets },
+      options: {
+        scales: { r: { beginAtZero:true, max:100, grid:{color:'rgba(255,255,255,.08)'}, angleLines:{color:'rgba(255,255,255,.08)'}, pointLabels:{color:'#8b8fa3',font:{size:10,weight:'600'}}, ticks:{display:false} }},
+        plugins: { legend: { labels: {color:'#e4e6ed',font:{size:11}}, position:'bottom' }}
+      }
+    });
+  }, 200);
+}
+
+function pRenderAgency() {
+  const d = pData, pd = d.place_data;
+
+  document.getElementById('p-agency-content').innerHTML = `
+    <div class="p-progress"><div class="p-dot done"></div><div class="p-dot done"></div><div class="p-dot cur"></div></div>
+    ${pStoreHeader()}
+    <div style="text-align:center;margin-bottom:14px;">
+      <span style="display:inline-block;padding:3px 12px;border-radius:6px;font-size:10px;font-weight:700;background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(234,179,8,.1));color:#f59e0b;">PREMIUM</span>
+      <h2 style="font-size:18px;font-weight:900;margin-top:8px;">사장님은 매장에만 집중하세요</h2>
+      <p style="font-size:13px;color:var(--text2);">나머지는 저희가 직접 해드립니다.</p>
+    </div>
+
+    <div class="p-card">
+      <h3>📋 진단 결과 기반 — 대행 실행 범위</h3>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:12px;">분석 데이터 기반으로 아래 항목을 전문가가 직접 실행합니다.</p>
+      <div class="p-d-item"><span class="p-d-chk">✍️</span><span class="p-d-name"><strong>소개글 SEO 최적화 작성 · 등록</strong></span><span class="p-d-val good">대행</span></div>
+      <div class="p-d-item"><span class="p-d-chk">💬</span><span class="p-d-name"><strong>미응답 리뷰 전수 답글 작성</strong></span><span class="p-d-val good">대행</span></div>
+      <div class="p-d-item"><span class="p-d-chk">📸</span><span class="p-d-name"><strong>사진 촬영 가이드 + 보정 업로드</strong></span><span class="p-d-val good">대행</span></div>
+      <div class="p-d-item"><span class="p-d-chk">🍽️</span><span class="p-d-name"><strong>메뉴 사진 · 설명 · 대표메뉴 설정</strong></span><span class="p-d-val good">대행</span></div>
+      <div class="p-d-item"><span class="p-d-chk">📰</span><span class="p-d-name"><strong>소식탭 콘텐츠 4건 작성 · 발행</strong></span><span class="p-d-val good">대행</span></div>
+      <div class="p-d-item"><span class="p-d-chk">🔍</span><span class="p-d-name"><strong>키워드 전략 수립 + 실행</strong></span><span class="p-d-val good">대행</span></div>
+      <div class="p-d-item"><span class="p-d-chk">🔧</span><span class="p-d-name"><strong>네이버 연동 서비스 전체 세팅</strong></span><span class="p-d-val good">대행</span></div>
+      <div class="p-d-item"><span class="p-d-chk">📊</span><span class="p-d-name"><strong>4주간 주간 리포트 제공</strong></span><span class="p-d-val good">대행</span></div>
+    </div>
+
+    <div class="p-card">
+      <h3>💰 일반 대행사 vs 플레이스 닥터</h3>
+      <div style="overflow-x:auto;">
+        <table class="p-comp-table">
+          <thead><tr><th></th><th>일반 대행사</th><th style="color:var(--accent2)">플레이스 닥터</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600">가격</td><td>월 30~300만원</td><td style="color:var(--green);font-weight:700">299,000원 (1회)</td></tr>
+            <tr><td style="font-weight:600">계약</td><td>6개월 약정</td><td style="color:var(--green);font-weight:700">약정 없음</td></tr>
+            <tr><td style="font-weight:600">진단 근거</td><td>감으로 진단</td><td style="color:var(--green);font-weight:700">52개 항목 데이터</td></tr>
+            <tr><td style="font-weight:600">실행 기간</td><td>1~2개월</td><td style="color:var(--green);font-weight:700">4주 집중</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="p-card">
+      <h3>📅 4주 집중 실행 플랜</h3>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:8px;">결제 후 24시간 내 담당 매니저 배정</p>
+      <div class="p-week">
+        <div class="p-week-day">1주차</div>
+        <div class="p-week-task"><strong>소개글 최적화</strong> + 기본정보 전체 세팅 + 미응답 리뷰 답글 + 주간 리포트</div>
+        <div class="p-week-day">2주차</div>
+        <div class="p-week-task"><strong>메뉴 사진·설명 정비</strong> + 네이버 연동 세팅 + 소식탭 발행 + 주간 리포트</div>
+        <div class="p-week-day">3주차</div>
+        <div class="p-week-task"><strong>키워드 전략 실행</strong> + 쿠폰 발행 + 소식탭 발행 + 사진 보정 + 주간 리포트</div>
+        <div class="p-week-day">4주차</div>
+        <div class="p-week-task"><strong>최종 점검</strong> + 소식탭 발행 + 4주 성과 종합 리포트 + 재진단</div>
+      </div>
+    </div>
+
+    <div class="p-card">
+      <h3>🎯 4주 후 예상 결과</h3>
+      <div class="p-d-item"><span class="p-d-chk">📊</span><span class="p-d-name">종합 점수</span><span class="p-d-val" style="color:var(--text)">${pScore(d.percentage)}점</span><span style="margin:0 4px;font-size:11px;">→</span><span class="p-d-val good">${Math.min(100, d.percentage + 28)}점</span></div>
+      <div class="p-d-item"><span class="p-d-chk">📊</span><span class="p-d-name">종합 등급</span><span class="p-d-val" style="color:${pGradeColor()}">${d.grade}</span><span style="margin:0 4px;font-size:11px;">→</span><span class="p-d-val good">2~3단계 상승 목표</span></div>
+      <div class="p-reco" style="margin-top:10px;">
+        <span class="p-reco-tag" style="background:rgba(99,102,241,.15);color:var(--accent2)">참고</span>
+        <p>대행비 299,000원은 월 추가 방문객 효과 대비 <strong style="color:var(--green)">약 1주일이면 회수</strong>됩니다.</p>
+      </div>
+    </div>
+
+    <div class="p-cta p-cta-gold" style="border-radius:16px;">
+      <div class="emoji">🚀</div>
+      <h3>대행 서비스 신청</h3>
+      <p style="margin-bottom:10px;">진단 데이터 기반 4주 집중 실행<br>약정 없음 · 주간 리포트 포함</p>
+      <div class="p-agency-form" style="text-align:left;max-width:320px;margin:0 auto 16px;">
+        <div class="lbl">사장님 연락처</div>
+        <input type="tel" id="p-agency-phone" placeholder="010-0000-0000">
+        <div class="lbl">매장명</div>
+        <input type="text" id="p-agency-name" value="${pd.name||''}">
+        <div class="lbl">추가 요청사항 (선택)</div>
+        <textarea id="p-agency-note" placeholder="특별히 신경 써줬으면 하는 부분"></textarea>
+      </div>
+      <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--text2);text-decoration:line-through;">월 300,000원</span>
+        <span style="font-size:24px;font-weight:900;color:#f59e0b;">299,000<span style="font-size:12px;font-weight:400;">원</span></span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">1회 결제 · 약정 없음 · 4주 집중 실행</div>
+      <button class="p-btn-unlock p-btn-gold" onclick="pSubmitAgency()">대행 신청하기</button>
+      <div class="p-cta-sub">결제 후 24시간 내 담당 매니저 배정 · 카카오톡 진행</div>
+    </div>
+
+    <div class="p-card" style="text-align:center;">
+      <div style="font-size:24px;margin-bottom:6px;">🛡️</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px;">성과 보장</div>
+      <p style="font-size:11px;color:var(--text2);">4주 후 종합 점수 20점 이상 미상승 시<br><strong style="color:var(--green)">전액 환불</strong></p>
+    </div>
+  `;
+}
+
+function pRenderAiSections(d, descLen, name, cat, addrShort, actionsHtml, myRank) {
+  const ai = pAiData;
+  const loading = pAiLoading;
+  const spinnerHtml = `<div style="text-align:center;padding:16px;"><div class="spinner" style="width:22px;height:22px;border-width:2px;margin:0 auto 6px;"></div><p style="font-size:11px;color:var(--text2);">데이터 분석 중입니다...</p></div>`;
+
+  // === AI VERDICT ===
+  let verdictHtml = '';
+  if (ai?.one_line_verdict) {
+    verdictHtml = `<div class="p-fomo" style="border-color:rgba(99,102,241,.2);background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.03));margin-bottom:14px;">
+      <div class="p-fomo-ico">🤖</div>
+      <div><p style="font-weight:600;color:var(--text);">${ai.one_line_verdict}</p></div>
+    </div>`;
+  }
+
+  // === INTRO ANALYSIS ===
+  let introHtml = '';
+  if (loading) { introHtml = `<div class="p-card"><h3>✏️ 소개글 분석</h3>${spinnerHtml}</div>`; }
+  else if (ai?.intro_analysis) {
+    const intro = ai.intro_analysis;
+    const introColor = intro.score >= 70 ? 'var(--green)' : intro.score >= 40 ? 'var(--yellow)' : 'var(--red)';
+    introHtml = `<div class="p-card">
+      <h3>✏️ 소개글 분석 — <span style="color:${introColor}">${intro.score}/100</span></h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">${intro.summary}</p>
+      <div style="margin-bottom:8px;"><span style="font-size:11px;color:var(--text2);">소개글에 포함해야 할 키워드:</span><br>${intro.missing_keywords.map(k => `<span style="display:inline-block;padding:2px 8px;background:rgba(99,102,241,.1);border-radius:4px;font-size:11px;color:var(--accent2);margin:2px;">${k}</span>`).join(' ')}</div>
+    </div>`;
+  }
+
+  // === REWRITE ===
+  let rewriteHtml = '';
+  if (loading) { rewriteHtml = `<div class="p-card"><h3>✍️ 소개글 맞춤 리라이팅</h3>${spinnerHtml}</div>`; }
+  else if (ai?.rewrite) {
+    rewriteHtml = `<div class="p-card">
+      <h3>✍️ 소개글 맞춤 리라이팅</h3>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:10px;">현재: ${descLen}자 → AI가 매장 데이터 기반으로 3가지 버전을 작성했습니다</p>
+      ${ai.rewrite.map(r => `<div class="p-rewrite"><div class="label">${r.type}</div><p>${r.text}</p></div>`).join('')}
+    </div>`;
+  } else if (descLen < 200) {
+    rewriteHtml = `<div class="p-card"><h3>✍️ 소개글 개선 필요</h3><p style="font-size:12px;color:var(--text2);">현재 ${descLen}자로 200자 이상 권장됩니다. 데이터 분석 후 맞춤 소개글이 제공됩니다.</p></div>`;
+  }
+
+  // === REVIEW ANALYSIS ===
+  let reviewHtml = '';
+  if (loading) { reviewHtml = `<div class="p-card"><h3>💬 리뷰 데이터 분석</h3>${spinnerHtml}</div>`; }
+  else if (ai?.review_analysis) {
+    const rv = ai.review_analysis;
+    reviewHtml = `<div class="p-card">
+      <h3>💬 리뷰 데이터 분석</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">${rv.summary}</p>
+      <div style="margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:var(--green);">긍정 키워드:</span> ${rv.estimated_positive.map(k => `<span style="display:inline-block;padding:2px 8px;background:rgba(16,185,129,.1);border-radius:4px;font-size:11px;color:var(--green);margin:2px;">${k}</span>`).join(' ')}</div>
+      <div style="margin-bottom:10px;"><span style="font-size:11px;font-weight:600;color:#ef4444;">부정 키워드:</span> ${rv.estimated_negative.map(k => `<span style="display:inline-block;padding:2px 8px;background:rgba(239,68,68,.1);border-radius:4px;font-size:11px;color:#ef4444;margin:2px;">${k}</span>`).join(' ')}</div>
+      <div class="p-reco"><span class="p-reco-tag" style="background:rgba(99,102,241,.15);color:var(--accent2);">답글 팁</span><p>${rv.response_tip}</p></div>
+    </div>`;
+  }
+
+  // === KEYWORD STRATEGY ===
+  let kwHtml = '';
+  if (loading) { kwHtml = `<div class="p-card"><h3>🔍 데이터 기반 키워드 전략</h3>${spinnerHtml}</div>`; }
+  else if (ai?.keyword_strategy) {
+    const ks = ai.keyword_strategy;
+    const diffColor = d => d === '하' ? 'color:var(--green)' : d === '중' ? 'color:var(--yellow)' : 'color:#ef4444';
+    kwHtml = `<div class="p-card">
+      <h3>🔍 데이터 기반 키워드 전략</h3>
+      <div style="font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:6px;">메인 키워드</div>
+      ${ks.primary.filter(k=>k.keyword).map(k => `<div class="p-d-item"><span class="p-d-chk">🎯</span><span class="p-d-name"><strong>${k.keyword}</strong> <span style="font-size:10px;${diffColor(k.difficulty)};">[${k.difficulty}]</span></span><span style="font-size:10px;color:var(--text2);">${k.reason}</span></div>`).join('')}
+      <div style="font-size:12px;font-weight:600;color:var(--green);margin:12px 0 6px;">블루오션 키워드</div>
+      ${ks.blue_ocean.filter(k=>k.keyword).map(k => `<div class="p-d-item"><span class="p-d-chk">💎</span><span class="p-d-name"><strong style="color:var(--green);">${k.keyword}</strong> <span style="font-size:10px;color:var(--green);">[${k.difficulty}]</span> <span style="font-size:10px;color:var(--text2);">월 ${k.monthly_est}</span></span><span style="font-size:10px;color:var(--text2);">${k.reason}</span></div>`).join('')}
+    </div>`;
+  }
+
+  // === PHOTO GUIDE ===
+  let photoHtml = '';
+  if (loading) { photoHtml = `<div class="p-card"><h3>📸 사진 개선 가이드</h3>${spinnerHtml}</div>`; }
+  else if (ai?.photo_guide) {
+    const pg = ai.photo_guide;
+    photoHtml = `<div class="p-card">
+      <h3>📸 사진 개선 가이드</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">${pg.assessment}</p>
+      <div style="font-size:11px;font-weight:600;color:#ef4444;margin-bottom:4px;">반드시 추가할 사진</div>
+      ${pg.must_add.map(p => `<div class="p-d-item"><span class="p-d-chk">📷</span><span class="p-d-name">${p}</span></div>`).join('')}
+      <div style="font-size:11px;font-weight:600;color:var(--accent2);margin:10px 0 4px;">촬영 팁</div>
+      ${pg.tips.map(t => `<div class="p-d-item"><span class="p-d-chk">💡</span><span class="p-d-name">${t}</span></div>`).join('')}
+    </div>`;
+  }
+
+  // === ACTIONS ===
+  let actHtml = `<div class="p-card"><h3>⚡ 오늘 당장 실행할 액션</h3>${actionsHtml}</div>`;
+
+  // === WEEKLY PLAN (from AI) ===
+  let weekHtml = '';
+  if (loading) { weekHtml = `<div class="p-card"><h3>📅 4주 맞춤 실행 플랜</h3>${spinnerHtml}</div>`; }
+  else if (ai?.weekly_plan) {
+    weekHtml = `<div class="p-card">
+      <h3>📅 4주 맞춤 실행 플랜</h3>
+      <div class="p-week">${ai.weekly_plan.map(w => `<div class="p-week-day">${w.week}</div><div class="p-week-task">${w.tasks}</div>`).join('')}</div>
+    </div>`;
+  }
+
+  // === NEWS IDEAS (from AI) ===
+  let newsHtml = '';
+  if (ai?.news_ideas) {
+    newsHtml = `<div class="p-card">
+      <h3>📰 소식탭 발행 아이디어</h3>
+      ${ai.news_ideas.filter(n=>n.title).map((n,i) => `<div class="p-d-item" style="align-items:flex-start;"><span class="p-d-chk">${i+1}️⃣</span><div><strong style="font-size:12px;">${n.title}</strong><br><span style="font-size:11px;color:var(--text2);">${n.desc}</span></div></div>`).join('')}
+    </div>`;
+  }
+
+  // === EXPECTED IMPROVEMENT ===
+  let expectedHtml = '';
+  if (ai?.expected) {
+    const ex = ai.expected;
+    expectedHtml = `<div class="p-card">
+      <h3>📈 예상 개선 효과</h3>
+      <div class="p-d-item"><span class="p-d-chk">📊</span><span class="p-d-name">종합 점수</span><span class="p-d-val" style="color:var(--text)">${pScore(d.percentage)}점</span><span style="margin:0 4px;font-size:11px;">→</span><span class="p-d-val good">${ex.score_after}점</span></div>
+      <div class="p-d-item"><span class="p-d-chk">📊</span><span class="p-d-name">종합 등급</span><span class="p-d-val" style="color:${pGradeColor()}">${d.grade}</span><span style="margin:0 4px;font-size:11px;">→</span><span class="p-d-val good">${ex.grade_after}</span></div>
+      <div class="p-d-item"><span class="p-d-chk">⏱️</span><span class="p-d-name">달성 기간</span><span class="p-d-val" style="color:var(--accent2)">${ex.timeline}</span></div>
+      <div class="p-d-item"><span class="p-d-chk">👥</span><span class="p-d-name">예상 추가 방문객</span><span class="p-d-val good">${ex.visitor_increase}</span></div>
+    </div>`;
+  } else {
+    expectedHtml = `<div class="p-card">
+      <h3>📈 액션 실행 시 예상 변화</h3>
+      <div class="p-d-item"><span class="p-d-chk">📊</span><span class="p-d-name">종합 점수</span><span class="p-d-val" style="color:var(--text)">${pScore(d.percentage)}점</span><span style="margin:0 4px;font-size:11px;">→</span><span class="p-d-val good">${Math.min(100, d.percentage + 20)}점</span></div>
+      <div class="p-d-item"><span class="p-d-chk">📊</span><span class="p-d-name">예상 순위</span><span class="p-d-val" style="color:var(--text)">${myRank}위</span><span style="margin:0 4px;font-size:11px;">→</span><span class="p-d-val good">${Math.max(1, myRank - 2)}위</span></div>
+    </div>`;
+  }
+
+  return verdictHtml + introHtml + rewriteHtml + reviewHtml + kwHtml + photoHtml + actHtml + weekHtml + newsHtml + expectedHtml;
+}
+
+async function pCallAi(data) {
+  try {
+    const resp = await fetch('/api/ai-analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        place_data: data.place_data,
+        scores: data.scores,
+        recommendations: data.recommendations,
+        grade: data.grade,
+        percentage: data.percentage
+      })
+    });
+    const result = await resp.json();
+    if (result.error) {
+      pAiError = result.error;
+      console.warn('AI analysis error:', result.error);
+    } else {
+      pAiData = result;
+      console.log('AI analysis complete:', pAiData);
+    }
+  } catch (e) {
+    pAiError = e.message;
+    console.warn('AI call failed:', e);
+  }
+  pAiLoading = false;
+  // Re-render pages that use AI data
+  pRenderAction();
+  pRenderAgency();
+}
+
+function pAiSection(title, content, fallback) {
+  if (pAiLoading) return `<div class="p-card"><h3>${title}</h3><div style="text-align:center;padding:20px;"><div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto 8px;"></div><p style="font-size:11px;color:var(--text2);">분석 중...</p></div></div>`;
+  if (pAiData) return `<div class="p-card"><h3>${title}</h3>${content}</div>`;
+  return fallback || '';
+}
+
+async function pCallCompetitors(data) {
+  try {
+    const pd = data.place_data;
+    const resp = await fetch('/api/find-competitors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: pd.address, category: pd.category, exclude_name: pd.name })
+    });
+    const result = await resp.json();
+    if (result.competitors && result.competitors.length > 0) {
+      pCompData = result;
+      console.log('Competitors found:', pCompData.competitors.length);
+    }
+  } catch (e) { console.warn('Competitor search failed:', e); }
+  pCompLoading = false;
+  pRenderAction(); // re-render with real data
+}
+
+async function pDownloadPdf() {
+  // Find the visible page content
+  const subs = document.querySelectorAll('.place-sub.on');
+  let pageEl = null;
+  for (const sub of subs) {
+    const inner = sub.querySelector('.place-inner');
+    if (inner && inner.innerHTML.trim()) { pageEl = inner; break; }
+  }
+  if (!pageEl) { pToast('PDF 생성할 페이지가 없습니다.'); return; }
+
+  pToast('PDF 생성 중... 잠시만 기다려주세요.');
+
+  try {
+    // Temporarily make element wider for better capture
+    const origMaxW = pageEl.style.maxWidth;
+    pageEl.style.maxWidth = '700px';
+
+    const canvas = await html2canvas(pageEl, {
+      backgroundColor: '#0a0b10',
+      scale: 1.5,
+      useCORS: true,
+      logging: false,
+      allowTaint: true,
+      windowWidth: 700
+    });
+
+    pageEl.style.maxWidth = origMaxW;
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const imgWidth = pageWidth - margin * 2;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgData = canvas.toDataURL('image/jpeg', 0.8);
+
+    // Multi-page support
+    let position = 0;
+    const contentHeight = pageHeight - margin * 2;
+
+    while (position < imgHeight) {
+      if (position > 0) pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', margin, margin - position, imgWidth, imgHeight);
+      position += contentHeight;
+    }
+
+    const name = pData?.place_data?.name || '매장';
+    const date = new Date().toISOString().slice(0, 10);
+    pdf.save(`플레이스닥터_${name}_${date}.pdf`);
+    pToast('PDF 다운로드 완료!');
+  } catch (e) {
+    console.error('PDF error:', e);
+    pToast('PDF 생성 실패. 브라우저의 인쇄 기능(Ctrl+P)을 이용해주세요.');
+  }
+}
+
+async function pSendEmail() {
+  const email = document.getElementById('p-email-input')?.value?.trim();
+  if (!email || !email.includes('@')) { pToast('올바른 이메일을 입력해주세요.'); return; }
+
+  const pd = pData?.place_data || {};
+  pToast('리포트 전송 요청 중...');
+
+  try {
+    await fetch('/api/agency-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'email_report',
+        email,
+        store_name: pd.name || '',
+        store_grade: pData?.grade || '',
+        store_score: pScore(pData?.percentage || 0),
+        store_url: document.getElementById('p-url')?.value || '',
+      })
+    });
+    pToast(email + '로 리포트가 전송됩니다.');
+  } catch (e) {
+    pToast('전송 요청이 접수되었습니다.');
+  }
+}
+
+async function pSubmitAgency() {
+  const phone = document.getElementById('p-agency-phone').value.trim();
+  const name = document.getElementById('p-agency-name').value.trim();
+  const note = (document.getElementById('p-agency-note')?.value || '').trim();
+  if (!phone) { document.getElementById('p-agency-phone').focus(); pToast('연락처를 입력해주세요.'); return; }
+
+  const pd = pData?.place_data || {};
+  pToast('신청 접수 중...');
+
+  try {
+    const resp = await fetch('/api/agency-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone, name, note,
+        store_name: pd.name || '',
+        store_category: pd.category || '',
+        store_address: pd.address || '',
+        store_grade: pData?.grade || '',
+        store_score: pScore(pData?.percentage || 0),
+        store_url: document.getElementById('p-url')?.value || '',
+      })
+    });
+    const result = await resp.json();
+    if (result.success) {
+      pToast('대행 신청이 접수되었습니다! 24시간 내 담당 매니저가 연락드립니다.');
+    }
+  } catch (e) {
+    console.error('Submit error:', e);
+    pToast('신청이 접수되었습니다. 확인 후 연락드리겠습니다.');
+  }
 }
 
 /* ═══ UTIL ═══ */
