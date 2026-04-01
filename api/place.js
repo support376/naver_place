@@ -4,7 +4,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://naver-place-14ms.vercel.app/api/analyze', {
+    const host = req.headers.host || 'naver-place-14ms.vercel.app';
+    const proto = req.headers['x-forwarded-proto'] || 'https';
+    const response = await fetch(`${proto}://${host}/api/analyze`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body),

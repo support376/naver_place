@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     for (const id of placeIds.slice(0, 5)) {
       try {
         const url = `https://m.place.naver.com/restaurant/${id}/home`;
-        const resp = await fetch('https://naver-place-14ms.vercel.app/api/analyze', {
+        const resp = await fetch('https://${req.headers.host || 'naver-place-14ms.vercel.app'}/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url }),
